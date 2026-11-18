@@ -1,0 +1,2456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batalla de Orvan</title>
+<style>
+  :root { --fondo:#05060a; --texto:#e8eaf0; --acento:#ffd23f; }
+  body { background:var(--fondo); color:var(--texto); font-family:system-ui, sans-serif; line-height:1.5; max-width:50em; margin:1em auto; padding:0 16px; }
+  h1, h2 { color:var(--acento); }
+  button { font-size:1.3em; padding:.5em 1.2em; margin:1em 0; }
+  #juego { min-height:4em; border:2px solid #333; padding:1em; margin-top:1em; }
+  #juego:focus { outline:3px solid var(--acento); }
+  #tactil { margin-top:1em; }
+  #tactil h2 { margin:.3em 0; }
+  .grupo-tactil { display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; }
+  .grupo-tactil button { margin:0; padding:.6em .2em; min-height:3.2em; font-size:1.05em; background:#1b2030; color:var(--texto); border:2px solid #556; border-radius:8px; touch-action:manipulation; }
+  .grupo-tactil button[aria-pressed="true"] { background:var(--acento); color:#000; border-color:#fff; }
+  .oculto { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Batalla de Orvan</h1>
+  <p>Juego de audio de combate espacial, pensado para jugarse de oído y con lector de pantalla. Eres piloto de la Coalición Libre y vuelas el Centella, la única nave de tu bando que lleva torpedos. Tu misión: destruir la Fortaleza Lunar y el Acorazado Tirano sin dejar que hundan tu crucero, el Vanguardia.</p>
+
+  <h2>Guía rápida</h2>
+  <ol>
+    <li>Juega con auriculares. Si es tu primera vez, empieza por el <strong>Entrenamiento</strong>: en 7 pasos cortos aprendes a moverte, disparar, esquivar, salir de la línea del rayo, derribar bombarderos, poner la guardia y recorrer el laberinto.</li>
+    <li>La batalla: aguanta mientras el equipo de tierra apaga el escudo de la Fortaleza Lunar, en el centro. Después entra en el conducto que hay debajo, recorre el laberinto hasta el reactor y lánzale un torpedo. Sal antes de que estalle y termina con el Acorazado Tirano, a la derecha.</li>
+    <li>Protege tu crucero, a la izquierda: si los bombarderos lo hunden, pierdes. Pon guardia en la entrada del conducto, pero no tanta que el crucero se quede sin defensa.</li>
+    <li>Teclas básicas: flechas para moverte, Espacio dispara, T lanza un torpedo, R habla por radio, G y Mayúsculas más G suben y bajan la guardia, O te dice el objetivo, H todas las teclas y Escape pausa.</li>
+    <li>Al terminar, escucha tu informe y tu puntuación con las flechas, y pulsa C para copiarlo y compartirlo.</li>
+  </ol>
+  <p><a href="manual.html">Manual completo del juego</a>: todas las reglas, teclas, sonidos y la puntuación.</p>
+
+  <h2>Aprender los sonidos</h2>
+  <p>Recorre la lista con las flechas arriba y abajo: se lee el nombre y la descripción de cada sonido. Enter lo reproduce y Escape sale.</p>
+  <button id="abrir-sonidos" type="button">Aprender los sonidos</button>
+
+  <h2>Opciones</h2>
+  <p><label for="dificultad">Dificultad: </label>
+    <select id="dificultad">
+      <option value="facil">Fácil</option>
+      <option value="normal" selected>Normal</option>
+      <option value="dificil">Difícil</option>
+    </select></p>
+  <p>En Fácil hay menos enemigos, hacen menos daño y tienes más tiempo para esquivar. Dentro del juego también puedes cambiarla con la D, en la pausa o al terminar una partida.</p>
+  <p><label><input type="checkbox" id="ligero"> Modo para computadoras lentas: menos sonidos a la vez. Actívalo si el juego se traba o el sonido se entrecorta.</label></p>
+  <p><label><input type="checkbox" id="ver-tactil"> Controles táctiles para celular: botones en pantalla debajo del juego. Se activa solo en celulares y tabletas.</label></p>
+  <p><label for="voz-radio">Voz de la radio: </label>
+    <select id="voz-radio"><option value="">Ninguna: la radio la lee el lector de pantalla</option></select></p>
+  <p><label for="vel-radio">Velocidad de la radio: </label>
+    <select id="vel-radio">
+      <option value="normal" selected>Normal</option>
+      <option value="rapida">Rápida</option>
+      <option value="muyRapida">Muy rápida</option>
+    </select></p>
+  <p>Los mensajes de radio (tus aliados, el equipo de tierra y el crucero) los dice una voz distinta de tu lector, para que no se pierdan entre los demás avisos.</p>
+  <button id="probar-radio" type="button">Probar la voz de la radio</button>
+  <p><label for="vel-lector">Velocidad de tu lector de pantalla: </label>
+    <select id="vel-lector">
+      <option value="normal">Normal</option>
+      <option value="rapida" selected>Rápida</option>
+      <option value="muyRapida">Muy rápida</option>
+    </select></p>
+  <p>El juego espera a que tu lector termine un mensaje antes de mandar el siguiente. Si los mensajes se te pisan, elige una velocidad más lenta; si notas silencios largos, una más rápida.</p>
+
+  <h2>Jugar</h2>
+  <p>Con NVDA, al pulsar un botón el juego pasa a modo foco solo. Si las teclas no responden, pulsa NVDA más Espacio. Cuando termines, desde el propio juego: Enter empieza una batalla, E el entrenamiento, D cambia la dificultad y M abre los sonidos.</p>
+  <p>En el celular, debajo del juego aparecen los controles táctiles. Los botones de moverse y disparar se quedan pulsados: tócalos una vez para empezar y otra para parar. Con TalkBack o VoiceOver, tócalos dos veces, como cualquier botón.</p>
+  <button id="entrenar" type="button">Entrenamiento</button>
+  <button id="comenzar" type="button">Comenzar batalla</button>
+
+  <div id="juego" role="application" tabindex="-1" aria-label="Batalla de Orvan. Pulsa H para la ayuda de teclas.">
+    <p id="estado-visual" aria-hidden="true">Pulsa Comenzar batalla.</p>
+  </div>
+
+  <section id="tactil" hidden aria-labelledby="titulo-tactil">
+    <h2 id="titulo-tactil">Controles táctiles</h2>
+    <div id="botones-tactil"></div>
+  </section>
+
+  <section id="informe" hidden>
+    <h2>Informe de misión</h2>
+    <ul id="informe-lista"></ul>
+    <button id="copiar-informe" type="button">Copiar el informe</button>
+  </section>
+
+  <p>Batalla de Orvan es software libre, con licencia GPL-3.0 (Licencia Pública General GNU, versión 3). Puedes jugarlo, copiarlo y mejorarlo; si publicas una versión modificada, compártela con la misma licencia y menciona a su autora o autor original. <a href="https://github.com/lishi-lg/batalla_de_orvan">Código del juego y licencia en GitHub</a>.</p>
+  <div id="voz-a0" class="oculto" aria-live="assertive" aria-atomic="true"></div>
+  <div id="voz-a1" class="oculto" aria-live="assertive" aria-atomic="true"></div>
+  <div id="voz-p" class="oculto" role="log" aria-live="polite"></div>
+</main>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+
+// ================== MUNDO ==================
+// Coordenadas: x de 0 (izquierda) a 100 (derecha); y de 0 (abajo) a 40 (arriba).
+const ANCHO = 100, ALTO = 40;
+const FORT = { x1: 48, x2: 52, y1: 18, y2: 22, cx: 50, cy: 20 };
+const ZONA = { x1: 45, x2: 55, y1: 18, y2: 25 };           // perímetro peligroso (arriba, izquierda, derecha)
+const BANDAS = [ { x1: 45, x2: 48, y1: 18, y2: 25 },          // izquierda
+                 { x1: 52, x2: 55, y1: 18, y2: 25 },          // derecha
+                 { x1: 45, x2: 55, y1: 22, y2: 25 } ];        // arriba
+// Mientras el escudo de la fortaleza está activo, el perímetro también la rodea por debajo
+const BANDA_ABAJO = { x1: 45, x2: 55, y1: 15, y2: 18 };
+const BANDAS_ESCUDO = [...BANDAS, BANDA_ABAJO];
+const ZONA_ESCUDO = { x1: 45, x2: 55, y1: 15, y2: 25 };
+const bandas = () => E.escudoFort ? BANDAS_ESCUDO : BANDAS;
+const zonaPeligro = () => E.escudoFort ? ZONA_ESCUDO : ZONA;
+const CONDUCTO = { x: 50, y: 17, tol: 0.8, y1: 15.5, y2: 18 };
+const ENTRADA = { x: 50, y: 16 };   // boca del conducto, donde se juntan guardias e intrusos
+// Rayo letal de la fortaleza: franja que fulmina todo lo que toca
+const RAYOS = {
+  izquierda: { x1: 18, x2: 48, y1: 18.5, y2: 21.5, nombre: 'hacia la izquierda' },
+  derecha:   { x1: 52, x2: 82, y1: 18.5, y2: 21.5, nombre: 'hacia la derecha' },
+  arriba:    { x1: 48.5, x2: 51.5, y1: 22, y2: 40, nombre: 'hacia arriba' },
+  abajo:     { x1: 48.5, x2: 51.5, y1: 0, y2: 18, nombre: 'hacia abajo' },
+};
+// Puestos de la guardia del conducto: por debajo de la fortaleza y fuera de la línea del rayo
+const PUESTOS = [[46.5, 13.5], [53.5, 13.5], [45, 11], [55, 11], [47, 8.5], [53, 8.5], [44, 13.8], [56, 13.8],
+                 [46, 5.5], [54, 5.5], [42.5, 11], [57.5, 11]];
+const PCT_GUARDIA = [0, .25, .5, .75];
+const NOMBRE_PCT = { .25: 'un cuarto', .5: 'la mitad', .75: 'tres cuartos' };
+const ACOR = { x1: 92, x2: 98, y1: 15, y2: 25, cx: 95, cy: 20, vidaMax: 80 };
+const CRUCERO = { x: 4, y: 20, x2: 8, vidaMax: 100 };
+const MOTOR_DE = { caza: 'aliado', interceptor: 'enemigo', bombardero: 'bombardero' };
+const NOMBRE = { caza: 'caza aliado', interceptor: 'interceptor', bombardero: 'bombardero' };
+const RADIO_EXPLOSION = 20, CUENTA = 15, MAX_TORPEDOS = 4;
+// capE: interceptores a la vez · spawnE: segundos entre interceptores · danoE/danoT: daño de láser/cañón
+// carga: tiempo para esquivar · prefJ: cuánto te persiguen (menor = más) · capB/bombCada: bombarderos
+// capA/inicialA/spawnA: cazas aliados a la vez, al empezar y segundos entre cada uno (más amenaza, más aliados)
+// escudo: segundos que tarda el equipo de tierra · rayoCarga/rayoCada: carga y pausa del rayo
+// labN: tamaño del laberinto · labMax: interceptores a la vez dentro · labVel: segundos por tramo del intruso
+// segTramo: segundos extra de cuenta atrás por cada tramo hasta la salida · cruCanon: segundos entre disparos del crucero
+const DIF = {
+  facil:   { nombre: 'fácil',   inicialE: 4, capE: 6,  spawnE: 4,   danoE: 7,  danoT: 6,  carga: .85, prefJ: 1.1, capA: 10, inicialA: 6, spawnA: 3.4, capB: 1, bombCada: 24,
+             escudo: 60, rayoCarga: 5,   rayoCada: 26, labN: 4, labMax: 1, labVel: .95, segTramo: 2.2, cruCanon: 1.8 },
+  normal:  { nombre: 'normal',  inicialE: 5, capE: 9,  spawnE: 3.2, danoE: 10, danoT: 8,  carga: .7,  prefJ: .85, capA: 11, inicialA: 7, spawnA: 3.1, capB: 2, bombCada: 18,
+             escudo: 75, rayoCarga: 4,   rayoCada: 20, labN: 5, labMax: 2, labVel: .75, segTramo: 1.8, cruCanon: 2.4 },
+  dificil: { nombre: 'difícil', inicialE: 6, capE: 14, spawnE: 2.6, danoE: 12, danoT: 10, carga: .55, prefJ: .7,  capA: 13, inicialA: 8, spawnA: 2.8, capB: 2, bombCada: 16,
+             escudo: 90, rayoCarga: 3.5, rayoCada: 16, labN: 6, labMax: 3, labVel: .6,  segTramo: 1.5, cruCanon: 3 },
+};
+let D = DIF.normal;
+
+const dentro = (x, y, r, m = 0) => x >= r.x1 - m && x <= r.x2 + m && y >= r.y1 - m && y <= r.y2 + m;
+const distRect = (x, y, r) => Math.hypot(Math.max(r.x1 - x, 0, x - r.x2), Math.max(r.y1 - y, 0, y - r.y2));
+const limitar = (v, a, b) => Math.max(a, Math.min(b, v));
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+// ================== VOZ ==================
+// NVDA lee los mensajes en fila y no deja interrumpirlos: si se juntan muchos, llegan tarde.
+// Por eso el juego lleva su propia fila: los avisos urgentes salen al momento; los demás esperan a que
+// el lector haya terminado (según la velocidad elegida en la página) y, si se quedan viejos, se descartan
+// en vez de leerse tarde. Un mensaje nuevo con la misma clave sustituye al que esperaba.
+const VEL_LECTOR = { normal: 13, rapida: 19, muyRapida: 27 };   // caracteres por segundo, aproximado
+const ESPERA_MAX = 5000;                                        // un mensaje que espera más de esto se descarta
+let alterna = 0, sintesis = false, vozBloqueada = 0, ocupadoHasta = 0, colaLector = [];
+const cps = () => VEL_LECTOR[$('#vel-lector').value] || 19;
+function decir(txt, urgente = true, prioridad = false, clave = null) {
+  const ahora = performance.now();
+  colaLector = colaLector.filter(m => m.txt !== txt && (!clave || m.clave !== clave));
+  if (prioridad) {
+    // los urgentes que esperaban salen delante, en el mismo mensaje, para no perderlos ni desordenarlos
+    const antes = colaLector.filter(m => m.urgente).map(m => m.txt);
+    colaLector = colaLector.filter(m => !m.urgente);
+    if (antes.length) txt = antes.join(' ') + ' ' + txt;
+    // con la voz del navegador un mensaje urgente corta al anterior, así que se protege más tiempo
+    vozBloqueada = ahora + (sintesis ? 3000 : 700);
+  }
+  else if (urgente && ahora < vozBloqueada) {
+    // no pisar un mensaje importante: espera, pero sale en cuanto termine (sin esperar a los demás)
+    // va detrás de los otros urgentes que esperan, pero delante de los mensajes normales
+    const i = colaLector.findIndex(m => !m.urgente), item = { txt, clave, t: ahora, urgente: true };
+    if (i < 0) colaLector.push(item); else colaLector.splice(i, 0, item);
+    return;
+  }
+  if (urgente) { emitir(txt, true); return; }
+  colaLector.push({ txt, clave, t: ahora });
+  vaciarCola();
+}
+function vaciarCola() {
+  const ahora = performance.now();
+  colaLector = colaLector.filter(m => ahora - m.t < ESPERA_MAX);
+  const m = colaLector[0];
+  if (!m) return;
+  if (m.urgente ? ahora >= vozBloqueada : ahora >= ocupadoHasta - 250) { colaLector.shift(); emitir(m.txt, !!m.urgente); }
+}
+function emitir(txt, urgente) {
+  const ahora = performance.now();
+  ocupadoHasta = Math.max(ahora, ocupadoHasta) + txt.length / cps() * 1000 + 300;
+  if (sintesis && hayVoz) {
+    if (urgente) speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt); u.lang = 'es-ES'; u.rate = 1.3;
+    speechSynthesis.speak(u);
+    return;
+  }
+  if (urgente) {
+    const a = $('#voz-a' + alterna), b = $('#voz-a' + (1 - alterna));
+    b.textContent = ''; a.textContent = txt; alterna = 1 - alterna;
+  } else {
+    const log = $('#voz-p'), p = document.createElement('p');
+    p.textContent = txt; log.appendChild(p);
+    while (log.children.length > 4) log.removeChild(log.firstChild);
+  }
+}
+setInterval(vaciarCola, 150);
+// Vacía las filas de mensajes y corta la radio (al empezar, terminar o pausar la partida)
+function callarVoces() {
+  colaLector = []; colaRadio = []; radioActual = null; clearTimeout(radioSeguro);
+  if (hayVoz && !sintesis) speechSynthesis.cancel();
+}
+
+// ---- Voz de la radio: los mensajes de radio los dice una voz del navegador, distinta del lector de pantalla ----
+// También lleva su fila: como mucho 2 mensajes esperando, los viejos se descartan y los urgentes cortan.
+const hayVoz = typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined';
+const VELOCIDAD_RADIO = { normal: 1.1, rapida: 1.4, muyRapida: 1.7 };
+let radioActiva = true, ultimaRadio = '', colaRadio = [], radioActual = null, radioSeguro = 0;
+const vocesEs = () => hayVoz ? speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith('es')) : [];
+function vozRadio() {
+  const id = $('#voz-radio').value;
+  return id ? vocesEs().find(v => v.voiceURI === id) || null : null;
+}
+function hablarRadio(txt, urgente, conEstatica = true, clave = null) {
+  if (!vozRadio()) return false;
+  if (urgente) { colaRadio = []; radioActual = null; clearTimeout(radioSeguro); speechSynthesis.cancel(); }
+  colaRadio = colaRadio.filter(m => m.txt !== txt && (!clave || m.clave !== clave));
+  colaRadio.push({ txt, clave, conEstatica, t: performance.now() });
+  if (colaRadio.length > 2) colaRadio.splice(0, colaRadio.length - 2);
+  siguienteRadio();
+  return true;
+}
+function siguienteRadio() {
+  if (radioActual) return;
+  const ahora = performance.now();
+  colaRadio = colaRadio.filter(m => ahora - m.t < 7000);
+  const m = colaRadio.shift(), v = vozRadio();
+  if (!m || !v) return;
+  if (m.conEstatica) SFX.radio();
+  const u = new SpeechSynthesisUtterance(m.txt);
+  u.voice = v; u.lang = v.lang; u.rate = VELOCIDAD_RADIO[$('#vel-radio').value] || 1.1;
+  radioActual = u;
+  const fin = () => { if (radioActual !== u) return; radioActual = null; clearTimeout(radioSeguro); siguienteRadio(); };
+  u.onend = fin; u.onerror = fin;
+  // por si el navegador no avisa de que ha terminado
+  radioSeguro = setTimeout(fin, (m.txt.length / (14 * u.rate) + 3) * 1000);
+  speechSynthesis.speak(u);
+}
+// Mensaje de radio: estática y la voz de la radio; si no hay voz elegida, lo lee el lector de pantalla
+function radio(txt, urgente = false, conEstatica = true, clave = null) {
+  ultimaRadio = txt;
+  if (radioActiva && hablarRadio(txt, urgente, conEstatica, clave)) return;
+  if (conEstatica) SFX.radio();
+  decir(txt, urgente, false, clave);
+}
+// Rellena la lista de voces en español (el navegador las carga poco a poco)
+function cargarVoces() {
+  const sel = $('#voz-radio'), vs = vocesEs();
+  let guardada = null; try { guardada = localStorage.getItem('orvan-voz-radio'); } catch (e) {}
+  const actual = sel.value || guardada;
+  sel.textContent = '';
+  const ninguna = document.createElement('option'); ninguna.value = ''; ninguna.textContent = 'Ninguna: la radio la lee el lector de pantalla';
+  sel.appendChild(ninguna);
+  for (const v of vs) { const o = document.createElement('option'); o.value = v.voiceURI; o.textContent = v.name + ' (' + v.lang + ')'; sel.appendChild(o); }
+  if (actual !== null && (actual === '' || vs.some(v => v.voiceURI === actual))) sel.value = actual;
+  else if (vs.length) {
+    // por defecto, una voz del mismo país que el navegador; si no, la primera en español
+    const pais = (navigator.language || 'es').toLowerCase();
+    sel.value = (vs.find(v => v.lang.toLowerCase() === pais) || vs[0]).voiceURI;
+  } else sel.value = '';
+}
+
+function rel(dx, dy) {
+  const p = [], ax = Math.round(Math.abs(dx)), ay = Math.round(Math.abs(dy));
+  if (ax > 0) p.push(ax + (dx > 0 ? ' a la derecha' : ' a la izquierda'));
+  if (ay > 0) p.push(ay + (dy > 0 ? ' arriba' : ' abajo'));
+  return p.length ? p.join(', ') : 'justo en tu posición';
+}
+
+// ================== AUDIO ==================
+let ctx = null, master = null, busJuego = null, busAmb = null, busLab = null, filtroExt = null, ruidoBuf = null, volumen = 0.8, volAmb = 1;
+function iniciarAudio() {
+  if (ctx) { ctx.resume(); return; }
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  master = ctx.createGain(); master.gain.value = volumen;
+  const comp = ctx.createDynamicsCompressor();
+  master.connect(comp); comp.connect(ctx.destination);
+  // la batalla de fuera pasa por este filtro: dentro del conducto se oye apagada
+  filtroExt = ctx.createBiquadFilter(); filtroExt.type = 'lowpass'; filtroExt.frequency.value = 20000; filtroExt.connect(master);
+  busAmb = ctx.createGain(); busAmb.gain.value = volAmb; busAmb.connect(filtroExt);   // fondo de la batalla
+  busJuego = ctx.createGain(); busJuego.connect(busAmb);   // motores de la partida (se silencian en pausa)
+  busLab = ctx.createGain(); busLab.connect(master);       // motores dentro del laberinto (se silencian en pausa)
+  const len = ctx.sampleRate * 2;
+  ruidoBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = ruidoBuf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+}
+
+// Posición relativa al jugador -> paneo, volumen, tono (altura) y filtro (distancia)
+function espacial(x, y, rango) {
+  const dx = x - J.x, dy = y - J.y, d = Math.hypot(dx, dy);
+  return {
+    pan: limitar(dx / 16, -1, 1),
+    g: d >= rango ? 0 : Math.pow(1 - d / rango, 1.5),
+    tono: Math.pow(2, limitar(dy / 14, -1, 1)),
+    corte: 300 + 9000 * Math.pow(Math.max(0, 1 - d / rango), 2),
+  };
+}
+
+// true mientras se ejecuta el código del laberinto: sus sonidos suenan cerca y nítidos
+let sonandoLab = false;
+// Límite de sonidos a la vez, para que las computadoras lentas no se atasquen.
+// Con mucho jaleo se descartan primero los sonidos de fondo y los muy bajitos; los avisos siempre suenan.
+let modoLigero = false, vocesActivas = [];
+const topeVoces = () => modoLigero ? 12 : 26;
+function sonido(o) {
+  if (!ctx) return;
+  const { x = null, y = null, tipo = 'sine', f0 = 440, dur = .2, vol = .3, rango = 50,
+          ruido = false, filtro = null, ataque = .005, panFijo = 0, retraso = 0, siempre = false } = o;
+  let { amb = false } = o;
+  const f1 = o.f1 ?? f0;
+  const t = ctx.currentTime + retraso;
+  let g = vol, pan = panFijo, tono = 1, corte = 18000;
+  // Estando dentro del conducto, lo que pasa fuera suena lejano y apagado (rayo, explosiones, bombas...)
+  if (x !== null && J.enLab && !sonandoLab && !siempre) { amb = true; g *= .5; }
+  if (x !== null) {
+    const s = espacial(x, y, rango);
+    g *= s.g; pan = s.pan; tono = s.tono; corte = s.corte;
+    if (g < 0.008) return;   // los sonidos casi inaudibles no se crean (ahorra procesador)
+  }
+  vocesActivas = vocesActivas.filter(fin => fin > ctx.currentTime);
+  if (vocesActivas.length >= topeVoces() && (amb || g < .05)) return;
+  vocesActivas.push(t + dur);
+  let src;
+  if (ruido) {
+    src = ctx.createBufferSource(); src.buffer = ruidoBuf; src.loop = true;
+  } else {
+    src = ctx.createOscillator(); src.type = tipo;
+    src.frequency.setValueAtTime(f0 * tono, t);
+    if (f1 !== f0) src.frequency.exponentialRampToValueAtTime(Math.max(1, f1 * tono), t + dur);
+  }
+  const fl = ctx.createBiquadFilter();
+  if (filtro) {
+    fl.type = filtro.tipo;
+    const cap = filtro.tipo === 'lowpass' ? corte : 20000;
+    fl.frequency.setValueAtTime(Math.min(cap, filtro.f0), t);
+    if (filtro.f1) fl.frequency.exponentialRampToValueAtTime(Math.min(cap, filtro.f1), t + dur);
+    if (filtro.tipo === 'bandpass') fl.Q.value = 1.5;
+  } else { fl.type = 'lowpass'; fl.frequency.value = corte; }
+  const ga = ctx.createGain();
+  ga.gain.setValueAtTime(0.0001, t);
+  ga.gain.exponentialRampToValueAtTime(Math.max(g, 0.0002), t + Math.min(ataque, dur * .8));
+  ga.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  const p = ctx.createStereoPanner(); p.pan.value = pan;
+  src.connect(fl); fl.connect(ga); ga.connect(p); p.connect(amb ? busAmb : master);
+  if (ruido) src.start(t, Math.random() * 1.5); else src.start(t);
+  src.stop(t + dur + .05);
+}
+
+function fijarGain(param, v) { param.cancelScheduledValues(ctx.currentTime); param.value = v; }
+// Dentro del conducto: la batalla de fuera suena lejana y apagada
+function ponerInterior(dentroLab) {
+  if (!ctx) return;
+  fijarGain(filtroExt.frequency, dentroLab ? 380 : 20000);
+  if (!E.pausa) fijarGain(busJuego.gain, dentroLab ? .22 : 1);
+}
+
+// Baja un momento el fondo de la batalla para que se oiga bien un aviso importante
+function resaltar(nivel = .4, dur = .35) {
+  if (!busAmb) return;
+  const t = ctx.currentTime;
+  busAmb.gain.cancelScheduledValues(t);
+  busAmb.gain.setTargetAtTime(volAmb * nivel, t, .015);
+  busAmb.gain.setTargetAtTime(volAmb, t + dur, .2);
+}
+
+const MOTORES = {
+  enemigo:   { voces: [['sawtooth', 170, .5], ['square', 256, .18]], lfo: [9, 14], corte: 2600, nivel: .22, rango: 45 },
+  aliado:    { voces: [['triangle', 110, .6], ['sawtooth', 111.7, .25]], lfo: [2.5, 2], corte: 1100, nivel: .3, rango: 45 },
+  bombardero:{ voces: [['triangle', 70, .5], ['sine', 105, .35], ['sine', 35, .4]], lfo: [2.5, 3], corte: 900, nivel: .22, rango: 50 },
+  fortaleza: { voces: [['sine', 55, .8], ['square', 82.5, .12], ['sine', 110, .3]], lfo: [.4, 1.5], corte: 450, nivel: .55, rango: 75 },
+  crucero:   { voces: [['sine', 98, .5], ['sine', 147, .35], ['triangle', 196, .2]], lfo: [.3, 1], corte: 900, nivel: .3, rango: 60 },
+  acorazado: { voces: [['sawtooth', 73, .4], ['sawtooth', 77.8, .4], ['square', 36.5, .2]], lfo: [.6, 2], corte: 500, nivel: .35, rango: 65 },
+  jugador:   { voces: [['sawtooth', 62, .5], ['triangle', 124, .3]], lfo: [5, 1], corte: 380, nivel: .12, rango: 1 },
+  conducto:  { voces: [['sine', 660, .4], ['sine', 990, .2]], lfo: [6, 8], corte: 3000, nivel: .12, rango: 1 },
+};
+class Motor {
+  constructor(nombre, destino = busJuego) {
+    const c = this.c = MOTORES[nombre];
+    this.filtro = ctx.createBiquadFilter(); this.filtro.type = 'lowpass'; this.filtro.frequency.value = c.corte;
+    this.salida = ctx.createGain(); this.salida.gain.value = 0;
+    this.pan = ctx.createStereoPanner();
+    this.filtro.connect(this.salida); this.salida.connect(this.pan); this.pan.connect(destino);
+    this.lfo = ctx.createOscillator(); this.lfo.frequency.value = c.lfo[0] * (0.9 + Math.random() * 0.2);
+    this.lfoG = ctx.createGain(); this.lfoG.gain.value = c.lfo[1]; this.lfo.connect(this.lfoG);
+    this.oscs = c.voces.map(([tipo, f, v]) => {
+      const o = ctx.createOscillator(); o.type = tipo; o.frequency.value = f;
+      const g = ctx.createGain(); g.gain.value = v;
+      o.connect(g); g.connect(this.filtro); this.lfoG.connect(o.frequency); o.start();
+      return { o, f };
+    });
+    this.lfo.start();
+  }
+  posicionar(x, y, vol = 1) {
+    const s = espacial(x, y, this.c.rango);
+    this.aplicar(s.pan, s.g * vol, s.tono, Math.min(this.c.corte, s.corte));
+  }
+  fijo(vol = 1, tono = 1, pan = 0) { this.aplicar(pan, vol, tono, this.c.corte); }
+  aplicar(pan, g, tono, corte) {
+    const t = ctx.currentTime;
+    this.pan.pan.setTargetAtTime(pan, t, .04);
+    this.salida.gain.setTargetAtTime(g * this.c.nivel, t, .06);
+    for (const v of this.oscs) v.o.frequency.setTargetAtTime(v.f * tono, t, .06);
+    this.filtro.frequency.setTargetAtTime(corte, t, .06);
+  }
+  detener() {
+    if (this.parado) return; this.parado = true;
+    const t = ctx.currentTime;
+    this.salida.gain.cancelScheduledValues(t); this.salida.gain.setTargetAtTime(0, t, .05);
+    const fin = t + .4;
+    this.oscs.forEach(v => v.o.stop(fin)); this.lfo.stop(fin);
+    setTimeout(() => { try { this.pan.disconnect(); } catch (e) {} }, 700);
+  }
+}
+
+// Tonos continuos de aviso. No pasan por el bus de batalla, así que no se atenúan con el ruido.
+const ZUMBIDOS = {
+  // pitido de radar vibrante: hay un enemigo en tu línea de tiro
+  mira:      { voces: [['sine', 1760, .6], ['sine', 2637, .3]], filtro: 'lowpass', corte: 6000, q: .7, am: 10, prof: .5, nivel: .16 },
+  // zumbido eléctrico: el perímetro de energía de la fortaleza está cerca
+  perimetro: { voces: [['sawtooth', 180, .5], ['sawtooth', 181.3, .5], ['square', 90, .3]], filtro: 'bandpass', corte: 1400, q: 1.2, am: 28, prof: .5, nivel: .5 },
+  // carga del rayo letal: zumbido grave que sube de tono y vibra cada vez más rápido
+  rayo:      { voces: [['sawtooth', 110, .5], ['sawtooth', 111.5, .4], ['sine', 220, .4]], filtro: 'lowpass', corte: 2500, q: 1, am: 3, prof: .45, nivel: .4 },
+};
+class Zumbido {
+  constructor(c, destino = master) {
+    this.c = c;
+    this.filtro = ctx.createBiquadFilter(); this.filtro.type = c.filtro; this.filtro.frequency.value = c.corte; this.filtro.Q.value = c.q;
+    // modulación de volumen: hace que el tono vibre o zumbe
+    this.am = ctx.createGain(); this.am.gain.value = 1 - c.prof;
+    this.lfo = ctx.createOscillator(); this.lfo.frequency.value = c.am;
+    const lg = ctx.createGain(); lg.gain.value = c.prof; this.lfo.connect(lg); lg.connect(this.am.gain);
+    this.salida = ctx.createGain(); this.salida.gain.value = 0;
+    this.pan = ctx.createStereoPanner();
+    this.filtro.connect(this.am); this.am.connect(this.salida); this.salida.connect(this.pan); this.pan.connect(destino);
+    this.oscs = c.voces.map(([tipo, fr, v]) => {
+      const o = ctx.createOscillator(); o.type = tipo; o.frequency.value = fr;
+      const g = ctx.createGain(); g.gain.value = v; o.connect(g); g.connect(this.filtro); o.start();
+      return { o, f: fr };
+    });
+    this.lfo.start();
+  }
+  set(vol, pan = 0, tono = 1, am = this.c.am) {
+    const t = ctx.currentTime;
+    this.salida.gain.setTargetAtTime(vol * this.c.nivel, t, .03);
+    this.pan.pan.setTargetAtTime(pan, t, .03);
+    for (const v of this.oscs) v.o.frequency.setTargetAtTime(v.f * tono, t, .05);
+    this.lfo.frequency.setTargetAtTime(am, t, .05);
+  }
+  detener() {
+    if (this.parado) return; this.parado = true;
+    const t = ctx.currentTime;
+    this.salida.gain.cancelScheduledValues(t); this.salida.gain.setTargetAtTime(0, t, .03);
+    const fin = t + .3; this.oscs.forEach(v => v.o.stop(fin)); this.lfo.stop(fin);
+    setTimeout(() => { try { this.pan.disconnect(); } catch (e) {} }, 500);
+  }
+}
+
+const SFX = {
+  laserJugador() { sonido({ tipo: 'square', f0: 1500, f1: 260, dur: .14, vol: .16, panFijo: J.dir * .25 }); },
+  laserEnemigo(x, y, amb = true) { sonido({ x, y, tipo: 'sawtooth', f0: 950, f1: 180, dur: .2, vol: .22, amb }); },
+  laserAliado(x, y) { sonido({ x, y, tipo: 'triangle', f0: 1250, f1: 520, dur: .13, vol: .18, amb: true }); },
+  // aviso: un enemigo te apunta (tres pitidos rápidos que suben)
+  carga(x, y) { [0, .16, .32].forEach((r, i) => sonido({ x, y, tipo: 'square', f0: 900 + i * 250, dur: .07, vol: .4, rango: 70, retraso: r })); resaltar(.35, .6); },
+  cargaTorreta(x, y, amb = false) { sonido({ x, y, tipo: 'sawtooth', f0: 120, f1: 480, dur: .7, vol: .4, ataque: .5, rango: 60, amb }); if (!amb) resaltar(.5, .7); },
+  canon(x, y, amb = false) {
+    sonido({ x, y, tipo: 'square', f0: 300, f1: 60, dur: .35, vol: .45, rango: 60, amb });
+    sonido({ x, y, ruido: true, dur: .3, vol: .3, filtro: { tipo: 'lowpass', f0: 1500, f1: 200 }, rango: 60, amb });
+  },
+  impacto(x, y, amb = false) {
+    sonido({ x, y, ruido: true, dur: .08, vol: .35, filtro: { tipo: 'bandpass', f0: 2500 }, amb });
+    sonido({ x, y, tipo: 'square', f0: 330, f1: 200, dur: .07, vol: .18, amb });
+  },
+  explosion(x, y, k = 1, amb = false) {
+    sonido({ x, y, ruido: true, dur: .9 * k, vol: .65, filtro: { tipo: 'lowpass', f0: 3000, f1: 90 }, rango: 60, amb });
+    sonido({ x, y, tipo: 'sine', f0: 95, f1: 28, dur: .8 * k, vol: .55, rango: 60, amb });
+  },
+  granExplosion(x, y) {
+    sonido({ x, y, ruido: true, dur: 4, vol: 1, ataque: .02, filtro: { tipo: 'lowpass', f0: 6000, f1: 50 }, rango: 300 });
+    sonido({ x, y, tipo: 'sine', f0: 70, f1: 18, dur: 3.5, vol: .9, rango: 300 });
+    sonido({ x, y, ruido: true, dur: 2.5, vol: .6, filtro: { tipo: 'lowpass', f0: 800, f1: 40 }, rango: 300, retraso: .6 });
+  },
+  confirmar() { sonido({ tipo: 'triangle', f0: 880, f1: 1320, dur: .16, vol: .35, retraso: .08 }); resaltar(.6, .3); },
+  danoJugador() {
+    sonido({ ruido: true, dur: .35, vol: .55, filtro: { tipo: 'lowpass', f0: 4000, f1: 300 } });
+    sonido({ tipo: 'sawtooth', f0: 220, f1: 55, dur: .35, vol: .35 });
+    resaltar(.5, .4);
+  },
+  casi(x, y) { sonido({ x, y, ruido: true, dur: .25, vol: .5, filtro: { tipo: 'bandpass', f0: 700, f1: 3500 }, rango: 12 }); resaltar(.5, .3); },
+  // torpedo: golpe grave de lanzamiento y un siseo que se aleja
+  torpedo() {
+    sonido({ tipo: 'sine', f0: 120, f1: 40, dur: .5, vol: .5 });
+    sonido({ ruido: true, dur: 1, vol: .35, ataque: .05, filtro: { tipo: 'bandpass', f0: 3000, f1: 300 } });
+  },
+  deflector(x, y) {
+    sonido({ x, y, tipo: 'sine', f0: 2400, f1: 1700, dur: .25, vol: .2 });
+    sonido({ x, y, tipo: 'triangle', f0: 1200, f1: 900, dur: .25, vol: .15 });
+  },
+  blindaje(x, y) { sonido({ x, y, tipo: 'square', f0: 180, f1: 140, dur: .12, vol: .22 }); },
+  bump() { sonido({ tipo: 'sine', f0: 120, f1: 70, dur: .13, vol: .35 }); },
+  blip(f) { sonido({ tipo: 'square', f0: f, dur: .035, vol: .13, ataque: .003, panFijo: J.dir * .3 }); },
+  ping() { sonido({ x: CONDUCTO.x, y: CONDUCTO.y, tipo: 'sine', f0: 1500, dur: .07, vol: .4, rango: 110 }); },
+  clic() { sonido({ ruido: true, dur: .015, vol: .55, ataque: .001, filtro: { tipo: 'highpass', f0: 2000 } }); },
+  alarma() {
+    sonido({ tipo: 'square', f0: 700, dur: .12, vol: .28 });
+    sonido({ tipo: 'square', f0: 950, dur: .12, vol: .28, retraso: .14 });
+  },
+  radio() {
+    sonido({ ruido: true, dur: .3, vol: .22, filtro: { tipo: 'bandpass', f0: 1800 } });
+    sonido({ tipo: 'sine', f0: 1000, dur: .08, vol: .2, retraso: .3 });
+    sonido({ tipo: 'sine', f0: 1300, dur: .08, vol: .2, retraso: .42 });
+  },
+  pitido(urgente) { sonido({ tipo: 'sine', f0: urgente ? 1400 : 1000, dur: .1, vol: .3 }); },
+  sirena() { sonido({ x: FORT.cx, y: FORT.cy, tipo: 'sawtooth', f0: 350, f1: 800, dur: .6, vol: .3, rango: 200, siempre: true }); },
+  bomba(x, y) { sonido({ x, y, tipo: 'sine', f0: 1300, f1: 250, dur: .7, vol: .3, rango: 55 }); },
+  // cañones de defensa del crucero: doble disparo seco
+  canonCru(x, y) {
+    [0, .09].forEach(r => {
+      sonido({ x, y, tipo: 'triangle', f0: 620, f1: 160, dur: .16, vol: .32, rango: 60, amb: true, retraso: r });
+      sonido({ x, y, ruido: true, dur: .1, vol: .2, filtro: { tipo: 'bandpass', f0: 1800, f1: 600 }, rango: 60, amb: true, retraso: r });
+    });
+  },
+  impactoCrucero() {
+    sonido({ x: CRUCERO.x, y: CRUCERO.y, ruido: true, dur: .6, vol: .6, filtro: { tipo: 'lowpass', f0: 2000, f1: 100 }, rango: 120 });
+    sonido({ x: CRUCERO.x, y: CRUCERO.y, tipo: 'square', f0: 140, f1: 70, dur: .3, vol: .3, rango: 120 });
+  },
+  aliadoCaido(x, y) { sonido({ x, y, tipo: 'triangle', f0: 520, f1: 180, dur: .5, vol: .3 }); },
+  giro(d) { sonido({ tipo: 'sine', f0: d > 0 ? 750 : 550, dur: .05, vol: .2, panFijo: d * .6 }); },
+  recarga() { sonido({ tipo: 'sine', f0: 500, f1: 1000, dur: .25, vol: .35 }); resaltar(.6, .3); },
+  acorde(notas, sep, dur, vol) { notas.forEach((f, i) => sonido({ tipo: 'triangle', f0: f, dur, vol, retraso: i * sep })); },
+  inicio() { this.acorde([392, 523, 659], .12, .4, .2); },
+  // salto de reaparición: barrido descendente y las tres notas de inicio
+  reaparicion() { sonido({ ruido: true, dur: .6, vol: .35, filtro: { tipo: 'bandpass', f0: 4000, f1: 300 } }); sonido({ tipo: 'sine', f0: 1600, f1: 200, dur: .5, vol: .25 }); this.acorde([392, 523, 659].map(n => n), .12, .4, .2); },
+  // ---- rayo y escudo de la fortaleza ----
+  disparoRayo(x, y) {
+    sonido({ x, y, ruido: true, dur: 1.4, vol: .9, ataque: .01, filtro: { tipo: 'lowpass', f0: 7000, f1: 300 }, rango: 150 });
+    sonido({ x, y, tipo: 'sawtooth', f0: 1200, f1: 50, dur: 1.3, vol: .5, rango: 150 });
+    sonido({ x, y, tipo: 'sine', f0: 60, f1: 30, dur: 1.5, vol: .6, rango: 150 });
+    resaltar(.3, 1.2);
+  },
+  peligroRayo() { sonido({ tipo: 'square', f0: 1800, dur: .05, vol: .3, ataque: .002 }); },
+  aSalvo() { sonido({ tipo: 'sine', f0: 600, f1: 900, dur: .14, vol: .22 }); },
+  escudoCae() {
+    sonido({ x: FORT.cx, y: FORT.cy, tipo: 'sawtooth', f0: 400, f1: 40, dur: 2, vol: .4, rango: 200 });
+    sonido({ x: FORT.cx, y: FORT.cy, ruido: true, dur: 1.5, vol: .3, filtro: { tipo: 'bandpass', f0: 3000, f1: 200 }, rango: 200 });
+  },
+  // ---- laberinto del conducto ----
+  // golpe metálico de compuerta (dos tonos que no casan, como el metal)
+  compuerta(vol = .3, pan = 0, retraso = 0, corte = 6000) {
+    sonido({ tipo: 'square', f0: 310, dur: .14, vol, panFijo: pan, retraso, filtro: { tipo: 'lowpass', f0: corte } });
+    sonido({ tipo: 'square', f0: 467, dur: .1, vol: vol * .7, panFijo: pan, retraso, filtro: { tipo: 'lowpass', f0: corte } });
+    sonido({ tipo: 'sine', f0: 90, f1: 55, dur: .25, vol: vol * 1.2, panFijo: pan, retraso });
+  },
+  // entrar en el conducto: compuerta que se cierra detrás de ti y su eco en el túnel
+  entrarLab() {
+    this.compuerta(.32);
+    [.17, .34, .51, .68].forEach((r, i) => this.compuerta(.32 * Math.pow(.45, i + 1), i % 2 ? .5 : -.5, r, 2500 - i * 500));
+    sonido({ ruido: true, dur: 1.2, vol: .12, ataque: .3, retraso: .2, filtro: { tipo: 'bandpass', f0: 500 } });   // aire del conducto
+  },
+  // salir: compuerta que se abre y el espacio abierto (soplido que sube)
+  salirLab() { this.compuerta(.3); sonido({ ruido: true, dur: .6, vol: .3, retraso: .1, filtro: { tipo: 'bandpass', f0: 300, f1: 3000 } }); },
+  // paso de un tramo: soplido corto y un eco metálico
+  paso() {
+    sonido({ ruido: true, dur: .1, vol: .18, filtro: { tipo: 'bandpass', f0: 900, f1: 500 } });
+    sonido({ tipo: 'triangle', f0: 1900, dur: .03, vol: .07, retraso: .02 });
+    sonido({ tipo: 'triangle', f0: 1900, dur: .03, vol: .03, retraso: .14, filtro: { tipo: 'lowpass', f0: 1500 } });
+  },
+  // salidas del tramo: izquierda y derecha en su oído, arriba agudo, abajo grave
+  salidas(lista, retraso = 0) {
+    const P = { izquierda: [-.9, 700], arriba: [0, 1400], derecha: [.9, 700], abajo: [0, 350] };
+    let i = 0;
+    for (const nom of ['izquierda', 'arriba', 'derecha', 'abajo']) {
+      if (!lista.includes(nom)) continue;
+      sonido({ tipo: 'triangle', f0: P[nom][1], dur: .06, vol: .32, panFijo: P[nom][0], retraso: retraso + i * .08 }); i++;
+    }
+  },
+  pared(nom) { sonido({ tipo: 'sine', f0: 120, f1: 70, dur: .13, vol: .35, panFijo: nom === 'izquierda' ? -.7 : nom === 'derecha' ? .7 : 0 }); },
+  // baliza del laberinto: suena hacia donde está el siguiente paso del camino
+  // (en el oído izquierdo o derecho; aguda si hay que subir, grave si hay que bajar)
+  pingLab(nom, salida) {
+    const [pan, k] = { izquierda: [-.85, 1], derecha: [.85, 1], arriba: [0, 1.5], abajo: [0, .6] }[nom] || [0, 1];
+    if (!salida) sonido({ tipo: 'sine', f0: 1300 * k, dur: .07, vol: .38, panFijo: pan });
+    else { sonido({ tipo: 'sine', f0: 900 * k, dur: .05, vol: .38, panFijo: pan }); sonido({ tipo: 'sine', f0: 1170 * k, dur: .05, vol: .38, panFijo: pan, retraso: .07 }); }
+  },
+  intruso() { [1200, 900, 600].forEach((f, i) => sonido({ tipo: 'square', f0: f, dur: .09, vol: .3, retraso: i * .12 })); resaltar(.4, .5); },
+  victoria() { this.acorde([523, 659, 784, 1047, 784, 1047], .18, .6, .22); },
+  derrota() { this.acorde([392, 330, 262, 196], .3, .7, .22); },
+};
+
+// Ambiente dentro del conducto: aire de ventilación que va y viene y un zumbido metálico grave
+class AmbienteLab {
+  constructor(destino = busLab) {
+    const t = ctx.currentTime;
+    this.salida = ctx.createGain(); this.salida.gain.value = 0; this.salida.connect(destino);
+    const aire = ctx.createBufferSource(); aire.buffer = ruidoBuf; aire.loop = true;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 450; bp.Q.value = 1.8;
+    const ola = ctx.createGain(); ola.gain.value = .55;
+    const lfo = ctx.createOscillator(); lfo.frequency.value = .22;
+    const lg = ctx.createGain(); lg.gain.value = .4; lfo.connect(lg); lg.connect(ola.gain);
+    aire.connect(bp); bp.connect(ola); ola.connect(this.salida);
+    const hum = ctx.createGain(); hum.gain.value = .35; hum.connect(this.salida);
+    this.nodos = [aire, lfo];
+    for (const f of [73, 74.3, 146]) { const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f; o.connect(hum); this.nodos.push(o); }
+    this.nodos.forEach(n => n.start(t));
+    this.salida.gain.setTargetAtTime(.22, t, .4);
+  }
+  detener() {
+    if (this.parado) return; this.parado = true;
+    const t = ctx.currentTime;
+    this.salida.gain.cancelScheduledValues(t); this.salida.gain.setTargetAtTime(0, t, .1);
+    this.nodos.forEach(n => n.stop(t + .5));
+    setTimeout(() => { try { this.salida.disconnect(); } catch (e) {} }, 800);
+  }
+}
+
+// ================== ESTADO ==================
+let J = { x: 8, y: 20, dir: 1 };   // jugador
+let E = { fase: 'menu' };          // estado de la partida
+let naves = [], proyectiles = [], siguienteId = 1;
+let L = null;                      // laberinto del conducto (se crea la primera vez que entras)
+const teclas = new Set();
+
+function nuevaNave(bando, x, y, tipo = bando === 'aliado' ? 'caza' : 'interceptor') {
+  const vidaMax = { caza: 4, interceptor: 3, bombardero: 10 }[tipo];
+  const n = {
+    id: siguienteId++, bando, tipo, x, y, vx: 0, vy: 0, vida: vidaMax, vidaMax,
+    dir: bando === 'enemigo' ? -1 : 1,
+    enfriar: 1 + Math.random() * 2, carga: 0, objetivo: null, repensar: 0,
+    fase: Math.random() * 6.28, dist: 7 + Math.random() * 6,
+    vel: { caza: 6.5, interceptor: 6, bombardero: 5 }[tipo],
+    motor: null,   // se crea solo cuando la nave está entre las más cercanas
+    muerto: false, curar: 0, reparando: false, zonaT: 0, atacaAcor: false,
+    guardia: false, puesto: -1, reaccion: 0,
+  };
+  naves.push(n); return n;
+}
+const enemigos = () => naves.filter(n => n.bando === 'enemigo' && !n.muerto);
+const bombarderos = () => naves.filter(n => n.tipo === 'bombardero' && !n.muerto);
+const aliados = () => naves.filter(n => n.bando === 'aliado' && !n.muerto);
+
+function detenerTodo() {
+  naves.forEach(n => n.motor && n.motor.detener());
+  ['mJug', 'mFort', 'mCru', 'mAcor', 'mCond', 'mira', 'perim', 'zRayo'].forEach(k => E[k] && E[k].detener());
+  if (L) L.enemigos.forEach(en => en.motor && en.motor.detener());
+  if (E.ambLab) { E.ambLab.detener(); E.ambLab = null; }
+  L = null;
+  naves = []; proyectiles = [];
+}
+
+// modo: 'batalla' o 'entrenamiento'
+function iniciarPartida(modo = 'batalla') {
+  iniciarAudio();
+  const tut = modo === 'entrenamiento';
+  D = tut ? DIF.facil : (DIF[$('#dificultad').value] || DIF.normal);
+  if (enSonidos) { pararDemo(); enSonidos = false; }
+  detenerTodo();
+  callarVoces();
+  teclas.clear();
+  E = { pausa: false };
+  fijarGain(busJuego.gain, 1); fijarGain(busLab.gain, 1); ponerInterior(false);
+  J = { x: 6, y: 20, dir: 1, escudos: 100, nivel: 4, vidas: 3, torpedos: MAX_TORPEDOS, enfriar: 0, vivo: true,
+        invul: 3, reaparecer: 0, enZona: false, enConducto: false, enHangar: true, bump: 0, moviendo: false,
+        enLab: false, enReactor: false, flecha: null };
+  E = { fase: 'juego', pausa: false, t: 0, fortaleza: true, cuenta: -1, ultimaCuenta: 99, torpedoEnVuelo: -1,
+        acorVida: ACOR.vidaMax, acorVivo: true, acorNivel: 4, avisoEscudoAcor: 0, escolta: 0, retirada: false,
+        spawnE: 2, spawnA: 3, spawnB: 25, cruVida: CRUCERO.vidaMax, cruNivel: 4, ping: 0, geiger: 0, alarma: 0, lock: 0, torreta: 2, torretaCarga: 0,
+        hangarT: 0, avisoBlindaje: 0,
+        escudoFort: true, escudoT: D.escudo, avisoTierra: 0,
+        rayo: { fase: 'espera', t: 15, total: 1, dir: null, avisado: false, enLinea: false }, rayoBip: 0,
+        guardiaPct: 0, relevoT: 0, avisoRelevo: 0,
+        cruCanonT: 2, cruCanonLado: 0,
+        danoCru: 0, radioT: 20, radioAv: {}, entradaTranquila: 0,
+        informe: [], iInforme: -1,
+        st: { ti: { interceptor: 0, bombardero: 0 }, tiLab: 0, ali: { interceptor: 0, bombardero: 0 },
+              otras: { canon: 0, perimetro: 0, rayo: 0, explosion: 0 }, derribado: 0, aliCaidos: 0, guardCaidos: 0, causasJ: {}, causasA: {},
+              golpeFort: null, golpeAcor: null },
+        tutorial: tut ? { paso: -1, espera: 1.2 } : null };
+  E.mJug = new Motor('jugador'); E.mFort = new Motor('fortaleza'); E.mCru = new Motor('crucero');
+  E.mAcor = new Motor('acorazado'); E.mCond = new Motor('conducto');
+  E.mira = new Zumbido(ZUMBIDOS.mira); E.perim = new Zumbido(ZUMBIDOS.perimetro); E.zRayo = new Zumbido(ZUMBIDOS.rayo);
+  if (!tut) {
+    for (let i = 0; i < D.inicialA; i++) nuevaNave('aliado', 9 + Math.random() * 6, 12 + Math.random() * 16);
+    for (let i = 0; i < D.inicialE; i++) nuevaNave('enemigo', 80 + Math.random() * 8, 10 + Math.random() * 20);
+  }
+  SFX.inicio();
+  $('#informe').hidden = true;
+  // pequeño retraso para que NVDA termine de anunciar el foco
+  if (tut) setTimeout(() => decir('Entrenamiento: ' + PASOS.length + ' pasos cortos. O repite las instrucciones, N salta un paso y Escape pausa.', true, true), 700);
+  else setTimeout(() => decir('¡Comienza la batalla, dificultad ' + D.nombre + '! Estás en el hangar. La fortaleza tiene el escudo activo: defiende tu crucero hasta que el equipo de tierra lo desactive. O: objetivo. H: ayuda.'), 700);
+  $('#estado-visual').textContent = tut ? 'Entrenamiento en curso.' : 'Batalla en curso.';
+  ultimo = performance.now();
+  cancelAnimationFrame(idBucle);
+  idBucle = requestAnimationFrame(bucle);
+}
+
+// ================== JUGADOR ==================
+function chocaSolido(x, y) {
+  return (E.fortaleza && dentro(x, y, FORT, .3)) || (E.acorVivo && dentro(x, y, ACOR, .3));
+}
+
+function actualizarJugador(dt) {
+  if (!J.vivo) { J.reaparecer -= dt; if (J.reaparecer <= 0) reaparecer(); return; }
+  if (J.enLab) { sonandoLab = true; actualizarLab(dt); sonandoLab = false; return; }
+  if (J.invul > 0) J.invul -= dt;
+  const v = teclas.has('Shift') ? 3.5 : 9;
+  let mx = 0, my = 0;
+  if (teclas.has('ArrowLeft')) mx--; if (teclas.has('ArrowRight')) mx++;
+  if (teclas.has('ArrowUp')) my++; if (teclas.has('ArrowDown')) my--;
+  let nx = J.x + mx * v * dt, ny = J.y + my * v * dt, choque = false;
+  if (nx < 0 || nx > ANCHO) { nx = limitar(nx, 0, ANCHO); choque = true; }
+  if (ny < 0 || ny > ALTO) { ny = limitar(ny, 0, ALTO); choque = true; }
+  if (chocaSolido(nx, ny)) {
+    if (!chocaSolido(nx, J.y)) ny = J.y;
+    else if (!chocaSolido(J.x, ny)) nx = J.x;
+    else { nx = J.x; ny = J.y; }
+    choque = true;
+  }
+  J.bump -= dt;
+  if (choque && (mx || my) && J.bump <= 0) { SFX.bump(); J.bump = .35; }
+  J.x = nx; J.y = ny; J.moviendo = !!(mx || my);
+
+  // Perímetro de la fortaleza
+  const enZona = E.fortaleza && bandas().some(b => dentro(J.x, J.y, b));
+  if (enZona && !J.enZona) decir('¡Peligro! Perímetro de la fortaleza. ¡Sal de ahí!');
+  J.enZona = enZona;
+  if (enZona) danarJugador(30 * dt, true, 'perimetro');
+  if (!J.vivo) return;
+
+  // Conducto: al entrar cambia el mapa al laberinto
+  const enC = E.fortaleza && !E.escudoFort &&
+              Math.abs(J.x - CONDUCTO.x) <= CONDUCTO.tol && J.y >= CONDUCTO.y1 && J.y < CONDUCTO.y2;
+  if (enC && !J.enConducto) {
+    J.enConducto = true;
+    if (E.cuenta >= 0 || E.torpedoEnVuelo >= 0) decir('El reactor ya está dañado. ¡Aléjate de la fortaleza!');
+    else { entrarLab(); return; }
+  }
+  J.enConducto = enC;
+
+  // Hangar
+  const enH = J.x < 10;
+  if (enH && !J.enHangar) decir('Hangar.', false, false, 'hangar');
+  J.enHangar = enH;
+  const enBaseEnemiga = E.acorVivo && J.x > 84;
+  if (enBaseEnemiga && !J.enBaseEnemiga) decir('Zona del acorazado: cuidado con sus cañones.', false);
+  J.enBaseEnemiga = enBaseEnemiga;
+  if (enH) {
+    const antes = J.escudos;
+    J.escudos = Math.min(100, J.escudos + 15 * dt);
+    J.nivel = Math.ceil(J.escudos / 25);
+    if (antes < 100 && J.escudos >= 100) decir('Escudos al cien por cien.', false);
+    if (J.torpedos < MAX_TORPEDOS) {
+      E.hangarT += dt;
+      if (E.hangarT >= 4) { J.torpedos++; E.hangarT = 0; SFX.recarga(); if (J.torpedos === MAX_TORPEDOS) decir('Torpedos a tope: ' + J.torpedos + '.', false, false, 'hangar'); }
+    }
+  } else E.hangarT = 0;
+
+  // Láser
+  J.enfriar -= dt;
+  if (teclas.has(' ') && J.enfriar <= 0) {
+    J.enfriar = .22;
+    proyectiles.push({ x: J.x + J.dir * .8, y: J.y, vx: J.dir * 45, vy: 0, bando: 'aliado', jugador: true, dano: 1, vida: 30 / 45, tipo: 'laser' });
+    SFX.laserJugador();
+  }
+}
+
+// fuente: de dónde viene el daño, para el informe ('disparos', 'canonAcor' o 'perimetro')
+function danarJugador(cant, continuo = false, fuente = 'disparos') {
+  if (!J.vivo || J.invul > 0) return;
+  // en el entrenamiento no se pierden escudos: solo se cuenta el golpe
+  if (E.tutorial) { if (!continuo) { SFX.danoJugador(); E.tutorial.golpes = (E.tutorial.golpes || 0) + 1; } return; }
+  J.escudos -= cant;
+  if (!continuo) SFX.danoJugador();
+  const nivel = Math.ceil(J.escudos / 25);
+  if (nivel < J.nivel && J.escudos > 0) {
+    const pc = Math.round(J.escudos);
+    decir(J.escudos <= 25 ? '¡Escudos críticos! ' + pc + ' por ciento' : 'Escudos ' + pc + ' por ciento');
+  }
+  J.nivel = nivel;
+  J.ultimaFuente = fuente;
+  if (J.escudos <= 0) morirJugador('¡Tu nave ha sido derribada!', '', fuente);
+}
+
+function morirJugador(causa, prefijo = '', fuente = J.ultimaFuente || 'disparos') {
+  if (!J.vivo) return;
+  if (J.enLab) salirLab(true);
+  J.vivo = false; J.vidas--; J.enZona = false; J.enConducto = false; E.st.derribado++; E.st.causasJ[fuente] = (E.st.causasJ[fuente] || 0) + 1;
+  SFX.explosion(J.x, J.y, 1.3);
+  if (J.vidas <= 0) { terminar(false, prefijo + causa + ' '); return; }
+  decir(prefijo + causa + ' Te quedan ' + J.vidas + (J.vidas === 1 ? ' vida.' : ' vidas.') + ' Reapareces en el hangar en 3 segundos.', true, true);
+  J.reaparecer = 3;
+}
+
+function reaparecer() {
+  Object.assign(J, { x: 6, y: 20, dir: 1, escudos: 100, nivel: 4, vivo: true, invul: 3, enHangar: true });
+  SFX.reaparicion();
+  decir('De vuelta en el hangar, con ' + pl(J.torpedos, 'torpedo', 'torpedos') + '.', true, true);
+}
+
+function lanzarTorpedo() {
+  if (!J.vivo) return;
+  if (J.torpedos <= 0) { decir('Sin torpedos. Recarga en el hangar, a la izquierda.'); return; }
+  if (J.enLab) {
+    if (!J.enReactor) { decir('Aquí no está el reactor. Sigue la baliza.'); return; }
+    J.torpedos--; SFX.torpedo();
+    E.torpedoEnVuelo = 1.5; J.enReactor = false;
+    decir('¡Torpedo lanzado al reactor!', true, true);
+    return;
+  }
+  J.torpedos--;
+  SFX.torpedo();
+  proyectiles.push({ x: J.x + J.dir, y: J.y, vx: J.dir * 26, vy: 0, bando: 'aliado', jugador: true, dano: 15, vida: 40 / 26, tipo: 'torpedo' });
+  decir('Torpedo lanzado. Quedan ' + J.torpedos + '.', false);
+}
+
+function usarRadio() {
+  if (!J.vivo) return;
+  if (E.cuenta >= 0 || E.torpedoEnVuelo >= 0) {
+    if (!E.retirada) { E.retirada = true; radio('¡A todas las naves: retirada al crucero, la fortaleza va a estallar!', true, true, 'orden'); }
+    else decir('Los aliados ya están en retirada.');
+  } else if (J.enLab) {
+    E.escolta = 15;
+    radio('Escuadrón: vigilamos la entrada del conducto 15 segundos.', true, true, 'orden');
+  } else {
+    E.escolta = 15;
+    radio('Escuadrón: ¡te cubrimos 15 segundos!', true, true, 'orden');
+  }
+}
+
+// ================== GUARDIA DEL CONDUCTO ==================
+const guardias = () => naves.filter(n => n.guardia && !n.muerto);
+const guardiasQuiero = () => Math.round(E.guardiaPct * D.capA);
+function asignarGuardia(n) {
+  const usados = new Set(guardias().map(g => g.puesto));
+  let p = 0; while (usados.has(p) && p < PUESTOS.length - 1) p++;
+  n.guardia = true; n.puesto = p; n.atacaAcor = false;
+}
+function liberarGuardias() { for (const n of naves) { n.guardia = false; n.puesto = -1; } }
+// G aumenta la guardia (delta 1) y Mayúsculas más G la reduce (delta -1)
+function ordenarGuardia(delta = 1) {
+  if (!J.vivo) return;
+  if (!E.fortaleza) { decir('La fortaleza ya no existe: no hace falta custodiar el conducto.'); return; }
+  if (E.retirada) { decir('Los aliados están en retirada.'); return; }
+  const i = PCT_GUARDIA.indexOf(E.guardiaPct), j = limitar(i + delta, 0, PCT_GUARDIA.length - 1);
+  if (j === i) {
+    decir(delta > 0 ? 'La guardia ya está al máximo.'
+                    : 'No hay guardia que reducir.');
+    return;
+  }
+  E.guardiaPct = PCT_GUARDIA[j]; E.entradaTranquila = 0;
+  if (E.tutorial) { if (delta > 0) E.tutorial.subio = true; else E.tutorial.bajo = true; }
+  const quiero = guardiasQuiero(), gs = guardias();
+  // al reducir, vuelven al combate primero los que están más lejos de la entrada
+  if (gs.length > quiero) gs.sort((a, b) => dist(a, ENTRADA) - dist(b, ENTRADA)).slice(quiero).forEach(n => { n.guardia = false; n.puesto = -1; });
+  else aliados().filter(n => !n.guardia).sort((a, b) => dist(a, ENTRADA) - dist(b, ENTRADA))
+                .slice(0, quiero - gs.length).forEach(asignarGuardia);
+  E.relevoT = 1.5;
+  const cuantos = pl(quiero, 'caza', 'cazas') + ', ' + NOMBRE_PCT[E.guardiaPct] + ' del escuadrón';
+  if (!quiero) radio('Guardia retirada: todos al combate.', true, true, 'guardia');
+  else if (delta < 0) radio('Guardia: bajamos a ' + cuantos + '.', true, true, 'guardia');
+  else radio('Guardia: ' + cuantos + (j === PCT_GUARDIA.length - 1 ? ', el máximo.' : '.'), true, true, 'guardia');
+}
+
+// ================== LABERINTO DEL CONDUCTO ==================
+const CELDA = 4;   // separación entre tramos, para el sonido
+const DIRS = { izquierda: [-1, 0], derecha: [1, 0], arriba: [0, 1], abajo: [0, -1] };
+const OPUESTO = { izquierda: 'derecha', derecha: 'izquierda', arriba: 'abajo', abajo: 'arriba' };
+const FLECHA_DIR = { ArrowLeft: 'izquierda', ArrowRight: 'derecha', ArrowUp: 'arriba', ArrowDown: 'abajo' };
+
+// Laberinto perfecto (un único camino entre dos tramos), distinto en cada partida.
+// La entrada está abajo en el centro; el reactor, en el tramo más alejado por el camino.
+function crearLab(N) {
+  const ab = Array.from({ length: N }, () => Array.from({ length: N }, () => new Set()));
+  const vis = Array.from({ length: N }, () => Array(N).fill(false));
+  const entrada = { c: Math.floor(N / 2), r: 0 };
+  const frontera = [entrada]; vis[entrada.c][entrada.r] = true;
+  while (frontera.length) {
+    // mezcla de "último añadido" y "al azar": pasillos con algunas bifurcaciones y callejones cortos
+    const i = Math.random() < .5 ? frontera.length - 1 : Math.floor(Math.random() * frontera.length);
+    const cur = frontera[i];
+    const libres = Object.entries(DIRS).filter(([, [dx, dy]]) => {
+      const c = cur.c + dx, r = cur.r + dy;
+      return c >= 0 && c < N && r >= 0 && r < N && !vis[c][r];
+    });
+    if (!libres.length) { frontera.splice(i, 1); continue; }
+    const [nom, [dx, dy]] = libres[Math.floor(Math.random() * libres.length)];
+    const sig = { c: cur.c + dx, r: cur.r + dy };
+    ab[cur.c][cur.r].add(nom); ab[sig.c][sig.r].add(OPUESTO[nom]);
+    vis[sig.c][sig.r] = true; frontera.push(sig);
+  }
+  const lab = { n: N, ab, entrada, enemigos: [], pc: entrada.c, pr: entrada.r, apunta: 'arriba', paso: 0, ping: 0, tiempo: 0, visitado: false };
+  lab.dEntrada = bfsLab(lab, entrada.c, entrada.r);
+  let max = -1, cand = [];
+  for (let c = 0; c < N; c++) for (let r = 0; r < N; r++) {
+    const d = lab.dEntrada[c][r];
+    if (d > max) { max = d; cand = [{ c, r }]; } else if (d === max) cand.push({ c, r });
+  }
+  lab.reactor = cand[Math.floor(Math.random() * cand.length)];
+  lab.dReactor = bfsLab(lab, lab.reactor.c, lab.reactor.r);
+  return lab;
+}
+function bfsLab(lab, c0, r0) {
+  const N = lab.n, d = Array.from({ length: N }, () => Array(N).fill(Infinity));
+  d[c0][r0] = 0; const cola = [[c0, r0]];
+  while (cola.length) {
+    const [c, r] = cola.shift();
+    for (const nom of lab.ab[c][r]) {
+      const nc = c + DIRS[nom][0], nr = r + DIRS[nom][1];
+      if (d[nc][nr] === Infinity) { d[nc][nr] = d[c][r] + 1; cola.push([nc, nr]); }
+    }
+  }
+  return d;
+}
+const enEntrada = (c, r) => c === L.entrada.c && r === L.entrada.r;
+// Salidas de un tramo; en la entrada, "abajo" es la salida al exterior
+const salidasDe = (c, r) => [...L.ab[c][r]].concat(enEntrada(c, r) ? ['abajo'] : []);
+function textoSalidas(c, r) {
+  const l = ['izquierda', 'arriba', 'derecha', 'abajo'].filter(n => salidasDe(c, r).includes(n));
+  return l.length === 1 ? l[0] : l.slice(0, -1).join(', ') + ' y ' + l[l.length - 1];
+}
+// Tramos que se ven en línea recta desde (c, r) hacia una dirección, hasta la primera pared
+function linea(c, r, nom, max = 99) {
+  const out = [];
+  while (out.length < max && L.ab[c][r].has(nom)) { c += DIRS[nom][0]; r += DIRS[nom][1]; out.push([c, r]); }
+  return out;
+}
+// Dirección desde la que (c, r) ve el tramo (tc, tr) en línea recta, o null
+function veA(c, r, tc, tr, max) {
+  for (const nom of Object.keys(DIRS)) if (linea(c, r, nom, max).some(([x, y]) => x === tc && y === tr)) return nom;
+  return null;
+}
+// Los sonidos del laberinto se colocan alrededor del jugador, como si cada tramo midiera CELDA unidades
+const posLab = (c, r) => [J.x + (c - L.pc) * CELDA, J.y + (r - L.pr) * CELDA];
+
+function entrarLab() {
+  if (!L) L = crearLab(D.labN);
+  J.enLab = true; J.enReactor = false; J.flecha = null;
+  L.pc = L.entrada.c; L.pr = L.entrada.r; L.apunta = 'arriba'; J.dir = 1; L.paso = .6; L.ping = .8; L.tiempo = 0;
+  ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].forEach(k => teclas.delete(k));
+  ponerInterior(true);
+  if (!E.ambLab) E.ambLab = new AmbienteLab();
+  SFX.entrarLab();
+  SFX.salidas(salidasDe(L.pc, L.pr), .9);
+  const sinT = J.torpedos ? '' : ' ¡No te quedan torpedos!';
+  if (!L.visitado) {
+    L.visitado = true;
+    decir('Dentro del conducto. Sigue la baliza hasta el reactor y pulsa T. F: siguiente paso.' + sinT, true, true);
+  } else decir('De nuevo en el conducto.' + sinT, true, true);
+}
+
+function salirLab(silencioso = false) {
+  if (!J.enLab) return;
+  J.enLab = false; J.enReactor = false; J.flecha = null;
+  for (const en of L.enemigos) {
+    if (en.motor) en.motor.detener();
+    // los intrusos que quedaban dentro salen detrás de ti
+    if (!silencioso && !en.muerto) { const n = nuevaNave('enemigo', 49 + Math.random() * 2, 13); n.vida = en.vida; }
+  }
+  L.enemigos = [];
+  ponerInterior(false);
+  if (E.ambLab) { E.ambLab.detener(); E.ambLab = null; }
+  E.mCond.fijo(0); E.mira.set(0);
+  J.x = CONDUCTO.x; J.y = CONDUCTO.y1 - .5; J.enConducto = false;
+  if (silencioso) return;
+  ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].forEach(k => teclas.delete(k));
+  SFX.salirLab();
+  if (E.tutorial) decir('Fuera del conducto.', true, true);
+  else if (E.cuenta >= 0) decir('¡Fuera! Aléjate más de 20 de la fortaleza. Quedan ' + Math.ceil(E.cuenta) + ' segundos.', true, true);
+  else if (E.torpedoEnVuelo >= 0) decir('¡Fuera! Aléjate de la fortaleza.', true, true);
+  else decir('Fuera del conducto.', true, true);
+}
+
+function actualizarLab(dt) {
+  if (J.invul > 0) J.invul -= dt;
+  L.tiempo += dt;
+  L.paso -= dt;
+  const fl = (J.flecha && teclas.has(J.flecha)) ? J.flecha : ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].find(k => teclas.has(k));
+  if (fl && L.paso <= 0) { moverLab(FLECHA_DIR[fl]); if (!J.enLab || !J.vivo) return; }
+  J.moviendo = L.paso > .2;
+
+  const enR = L.pc === L.reactor.c && L.pr === L.reactor.r && E.cuenta < 0 && E.torpedoEnVuelo < 0;
+  if (enR && !J.enReactor) decir('¡Reactor! Pulsa T.' + (J.torpedos ? '' : ' Pero no te quedan torpedos.'), true, true);
+  J.enReactor = enR;
+
+  J.enfriar -= dt;
+  if (teclas.has(' ') && J.enfriar <= 0) { J.enfriar = .22; SFX.laserJugador(); dispararLab(); }
+
+  for (const en of L.enemigos) { actualizarIntruso(en, dt); if (!J.vivo || !J.enLab) return; }
+  L.enemigos = L.enemigos.filter(en => !en.muerto);
+}
+
+function moverLab(nom) {
+  L.paso = .38;
+  L.apunta = nom;
+  if (nom === 'izquierda') J.dir = -1; else if (nom === 'derecha') J.dir = 1;
+  if (nom === 'abajo' && enEntrada(L.pc, L.pr)) { salirLab(); return; }
+  if (!L.ab[L.pc][L.pr].has(nom)) { SFX.pared(nom); return; }
+  const nc = L.pc + DIRS[nom][0], nr = L.pr + DIRS[nom][1];
+  if (L.enemigos.some(en => en.c === nc && en.r === nr)) {
+    SFX.pared(nom);
+    if (E.t > (L.avisoBloqueo || 0)) { L.avisoBloqueo = E.t + 4; decir('Un interceptor te bloquea el paso. ¡Dispara!', false); }
+    return;
+  }
+  L.pc = nc; L.pr = nr;
+  SFX.paso(); SFX.salidas(salidasDe(nc, nr), .12);
+  if (enEntrada(nc, nr)) decir('Entrada: abajo sales.', false, false, 'entrada');
+}
+
+// Láser dentro del conducto: alcanza al primer interceptor del pasillo hacia donde apuntas
+function dispararLab() {
+  for (const [c, r] of [[L.pc, L.pr], ...linea(L.pc, L.pr, L.apunta, 8)]) {
+    const en = L.enemigos.find(e => !e.muerto && e.c === c && e.r === r);
+    if (!en) continue;
+    const [x, y] = posLab(c, r);
+    en.vida--; SFX.impacto(x, y);
+    if (en.vida <= 0) {
+      en.muerto = true; if (en.motor) { en.motor.detener(); en.motor = null; }
+      SFX.explosion(x, y, .6); SFX.confirmar();
+      E.st.ti.interceptor++; E.st.tiLab++;
+      decir('Interceptor derribado.', true);
+    }
+    return;
+  }
+}
+
+// Interceptor dentro del conducto: te persigue por el camino más corto y dispara si te ve en línea recta
+function actualizarIntruso(en, dt) {
+  const [x, y] = posLab(en.c, en.r);
+  en.enfriar -= dt;
+  if (en.carga > 0) {
+    en.carga -= dt;
+    if (en.carga <= 0) {
+      SFX.laserEnemigo(x, y, false);
+      en.enfriar = 1.3 + Math.random();
+      if (veA(en.c, en.r, L.pc, L.pr, 5) || (en.c === L.pc && en.r === L.pr)) danarJugador(D.danoE);
+      else SFX.casi(x, y);
+    }
+    return;
+  }
+  const mismo = en.c === L.pc && en.r === L.pr;
+  if (en.enfriar <= 0 && (mismo || veA(en.c, en.r, L.pc, L.pr, 5))) { en.carga = D.carga + .15; SFX.carga(x, y); return; }
+  en.paso -= dt;
+  if (en.paso > 0) return;
+  en.paso = D.labVel;
+  const d = bfsLab(L, L.pc, L.pr);
+  for (const nom of L.ab[en.c][en.r]) {
+    const nc = en.c + DIRS[nom][0], nr = en.r + DIRS[nom][1];
+    if (d[nc][nr] < d[en.c][en.r] && !(nc === L.pc && nr === L.pr) && !L.enemigos.some(o => o !== en && o.c === nc && o.r === nr)) {
+      en.c = nc; en.r = nr; break;
+    }
+  }
+}
+
+// Un interceptor que llega a la boca del conducto entra detrás de ti
+function meterEnLab(n) {
+  n.muerto = true; if (n.motor) { n.motor.detener(); n.motor = null; }
+  L.enemigos.push({ c: L.entrada.c, r: L.entrada.r, vida: n.vida, paso: D.labVel, enfriar: 1.5, carga: 0, motor: null, muerto: false });
+  SFX.intruso();
+  decir('¡Un interceptor ha entrado en el conducto!', true, true);
+}
+
+// ================== IA ==================
+function elegirObjetivo(n) {
+  let mejor = null, md = Infinity;
+  if (n.bando === 'enemigo') {
+    if (J.vivo && !J.enLab) { md = dist(n, J) * D.prefJ; mejor = J; }   // prefieren al jugador
+    for (const o of naves) if (o.bando === 'aliado' && !o.muerto) { const d = dist(n, o); if (d < md) { md = d; mejor = o; } }
+  } else if (n.guardia) {
+    // la guardia solo persigue a los enemigos que se acercan a la entrada del conducto
+    md = 14;
+    for (const o of naves) {
+      if (o.bando !== 'enemigo' || o.muerto) continue;
+      const d = dist(o, ENTRADA); if (d < md) { md = d; mejor = o; }
+    }
+  } else {
+    const ref = (E.escolta > 0 && J.vivo) ? J : n;
+    for (const o of naves) {
+      if (o.bando !== 'enemigo' || o.muerto) continue;
+      // los bombarderos que amenazan el crucero tienen prioridad
+      const d = dist(ref, o) * (o.tipo === 'bombardero' && o.x < 35 ? .6 : 1);
+      if (d < md) { md = d; mejor = o; }
+    }
+  }
+  return mejor;
+}
+
+function actualizarNave(n, dt) {
+  if (n.dron) { n.vx = n.vy = 0; return; }   // dron de práctica: quieto y sin disparar
+  const aliada = n.bando === 'aliado';
+
+  // Reparación en la base propia
+  const enBase = aliada ? n.x <= 10 : n.x >= 86;
+  if (enBase && n.vida < n.vidaMax) { n.curar += dt; if (n.curar >= 1.5) { n.curar = 0; n.vida++; } } else n.curar = 0;
+  if (n.vida <= 1 && n.tipo !== 'bombardero') n.reparando = true;
+  if (n.reparando && n.vida >= n.vidaMax) n.reparando = false;
+
+  n.repensar -= dt;
+  if (n.repensar <= 0) {
+    n.repensar = .4 + Math.random() * .3;
+    n.objetivo = n.tipo === 'bombardero' ? null : elegirObjetivo(n);
+    // un tercio de los aliados se dedica al acorazado; el resto, si no tiene enemigos cerca
+    n.atacaAcor = aliada && !n.guardia && !E.fortaleza && E.acorVivo && !E.retirada && !(n.objetivo && n.objetivo.tipo === 'bombardero') &&
+                  (n.id % 3 === 0 || !n.objetivo || dist(n, n.objetivo) > 18);
+    // con el jugador dentro del conducto, la mitad de los interceptores va a por la entrada
+    n.cazador = !aliada && n.tipo === 'interceptor' && J.enLab && L && L.tiempo > 4 && n.id % 2 === 0;
+  }
+  let obj = n.objetivo;
+  if (obj && (obj.muerto || (obj === J && (!J.vivo || J.enLab)))) obj = n.objetivo = null;
+
+  // ¿Está en la línea del rayo que se carga? Cada nave reacciona con su propio retraso: algunas no llegan
+  const R = E.rayo, banda = R.fase === 'carga' ? RAYOS[R.dir] : null;
+  const huye = banda && dentro(n.x, n.y, banda, 1.5) && R.total - R.t >= (n.reaccion || 0);
+
+  let tx, ty;
+  if (huye) {
+    if (banda.x2 - banda.x1 > banda.y2 - banda.y1) { tx = n.x; ty = n.y >= (banda.y1 + banda.y2) / 2 ? banda.y2 + 2.5 : banda.y1 - 2.5; }
+    else { ty = n.y; tx = n.x >= FORT.cx ? banda.x2 + 2.5 : banda.x1 - 2.5; }
+  }
+  else if (n.tipo === 'bombardero') { tx = 24; ty = CRUCERO.y + ((n.id % 5) - 2) * 2.5; }
+  else if (aliada && E.retirada) { tx = 8 + (n.id % 5); ty = 6 + (n.id % 8) * 4; }
+  else if (n.guardia && !n.reparando) {
+    if (obj) { const lado = n.x >= obj.x ? 1 : -1; tx = obj.x + lado * 4; ty = obj.y + Math.sin(E.t * .8 + n.fase) * 1.5; }
+    else [tx, ty] = PUESTOS[n.puesto] || PUESTOS[0];
+  }
+  else if (n.cazador && !n.reparando) { tx = ENTRADA.x; ty = ENTRADA.y - .2; }
+  else if (n.tirador) { tx = J.x + (J.x < 60 ? 13 : -13); ty = J.y; }   // interceptor de práctica: se pone a tu altura
+  else if (n.reparando) { tx = aliada ? 6 : 89; ty = 20 + ((n.id % 7) - 3) * 2; }
+  else if (n.atacaAcor) { tx = ACOR.x1 - n.dist; ty = ACOR.y1 + 1 + (n.id % 9); }
+  else if (obj) { const lado = n.x >= obj.x ? 1 : -1; tx = obj.x + lado * n.dist; ty = obj.y + Math.sin(E.t * .8 + n.fase) * 2.2; }
+  else if (aliada) { tx = J.x - 3 - (n.id % 4) * 2; ty = J.y + ((n.id % 5) - 2) * 3; }
+  else { tx = 80; ty = 20 + Math.sin(E.t * .3 + n.fase) * 12; }
+  if (E.fortaleza && !huye && tx > 42 && tx < 58 && ty < 16 && n.y > 15) {
+    // para llegar debajo de la fortaleza, primero la rodean por un lado en vez de chocar con ella
+    const lado = n.x < FORT.cx ? 42 : 58;
+    if (Math.abs(n.x - FORT.cx) < 7.5) { tx = lado; ty = n.y; } else { tx = lado; ty = 12; }
+  }
+
+  const dx = tx - n.x, dy = ty - n.y, d = Math.hypot(dx, dy) || 1;
+  const vel = Math.min(n.vel, d * 1.5);
+  let desX = dx / d * vel, desY = dy / d * vel;
+  for (const o of naves) {
+    if (o === n || o.muerto) continue;
+    const sx = n.x - o.x, sy = n.y - o.y, sd = sx * sx + sy * sy;
+    if (sd < 2.5 && sd > 1e-4) { desX += sx / sd * 1.5; desY += sy / sd * 1.5; }
+  }
+  // Intentan apartarse del perímetro de la fortaleza, pero en pleno combate pueden caer dentro
+  if (E.fortaleza && dentro(n.x, n.y, zonaPeligro(), 1.5)) {
+    const rx = n.x - FORT.cx, ry = n.y - FORT.cy, rl = Math.hypot(rx, ry) || 1;
+    desX += rx / rl * 5; desY += ry / rl * 5;
+  }
+  const k = Math.min(1, dt * 3);
+  n.vx += (desX - n.vx) * k; n.vy += (desY - n.vy) * k;
+  let nx = n.x + n.vx * dt, ny = n.y + n.vy * dt;
+  if ((E.fortaleza && dentro(nx, ny, FORT, .3)) || (E.acorVivo && dentro(nx, ny, ACOR, .5))) { nx = n.x; ny = n.y; }
+  const xMin = aliada ? 2 : (n.tipo === 'bombardero' ? 11 : 14);
+  n.x = limitar(nx, xMin, aliada ? 88 : 90);
+  n.y = limitar(ny, 1, ALTO - 1);
+
+  // Daño del perímetro: 1 punto cada 0,8 segundos dentro
+  if (E.fortaleza && bandas().some(b => dentro(n.x, n.y, b))) {
+    n.zonaT += dt;
+    if (n.zonaT >= .8) { n.zonaT = 0; n.vida--; SFX.impacto(n.x, n.y, true); if (n.vida <= 0) { matar(n, true, 'perimetro'); return; } }
+  } else n.zonaT = 0;
+
+  // Disparo
+  n.enfriar -= dt;
+  if (n.carga > 0) {
+    n.carga -= dt;
+    if (n.carga <= 0) {
+      if (n.tipo === 'bombardero') {
+        proyectiles.push({ x: n.x - 1, y: n.y, vx: -14, vy: 0, bando: 'enemigo', jugador: false, dano: 4, vida: 3, tipo: 'bomba' });
+        SFX.bomba(n.x, n.y);
+        n.enfriar = 2.2;
+      } else {
+        proyectiles.push({ x: n.x + n.dir * .8, y: n.y, vx: n.dir * 30, vy: 0, bando: n.bando, jugador: false, dano: D.danoE, vida: 25 / 30, tipo: 'laser' });
+        if (n.tirador) E.tutorial.disparos++;
+        if (n.bando === 'enemigo') SFX.laserEnemigo(n.x, n.y); else SFX.laserAliado(n.x, n.y);
+        n.enfriar = 1.4 + Math.random() * 1.3;
+      }
+    }
+  } else if (n.tipo === 'bombardero') {
+    if (n.x <= 28 && n.enfriar <= 0) {
+      n.carga = .4;
+      if (!n.avisado) { n.avisado = true; radio('Vanguardia: ¡un bombardero nos ataca!', false, true, 'ataque'); }
+    }
+  } else if (n.enfriar <= 0) {
+    if (obj && Math.abs(obj.y - n.y) < 1.3 && Math.abs(obj.x - n.x) < 22) {
+      n.dir = obj.x >= n.x ? 1 : -1;
+      n.carga = obj === J ? D.carga : .3;
+      if (obj === J) SFX.carga(n.x, n.y);
+    } else if (n.atacaAcor && n.y >= ACOR.y1 && n.y <= ACOR.y2 && ACOR.x1 - n.x < 22) {
+      n.dir = 1; n.carga = .3;
+    } else if (obj) n.dir = obj.x >= n.x ? 1 : -1;
+  }
+}
+
+// causa: 'jugador', 'aliado', 'enemigo', 'perimetro', 'rayo' o 'explosion' (para el informe de misión)
+function matar(n, conSonido = true, causa = 'enemigo') {
+  if (n.muerto) return;
+  n.muerto = true; if (n.motor) { n.motor.detener(); n.motor = null; }
+  const s = E.st;
+  if (n.bando === 'enemigo') {
+    if (causa === 'jugador') s.ti[n.tipo]++;
+    else if (causa === 'aliado') s.ali[n.tipo]++;
+    else if (s.otras[causa] !== undefined) s.otras[causa]++;
+  } else { s.aliCaidos++; if (n.guardia) s.guardCaidos++; s.causasA[causa] = (s.causasA[causa] || 0) + 1; }
+  if (conSonido) { SFX.explosion(n.x, n.y, n.tipo === 'bombardero' ? 1 : .6, true); if (n.bando === 'aliado') SFX.aliadoCaido(n.x, n.y); }
+}
+
+// Cañones del acorazado: disparan al jugador o a los aliados que se acerquen
+function actualizarTorreta(dt) {
+  if (!E.acorVivo || E.tutorial) return;
+  const cerca = o => { const px = limitar(o.x, ACOR.x1, ACOR.x2), py = limitar(o.y, ACOR.y1, ACOR.y2); return Math.hypot(o.x - px, o.y - py); };
+  let blanco = null, md = 26;
+  if (J.vivo && !J.enLab && cerca(J) * .8 < md) { blanco = J; md = cerca(J) * .8; }
+  for (const o of naves) if (o.bando === 'aliado' && !o.muerto && cerca(o) < md) { blanco = o; md = cerca(o); }
+  if (!blanco) { E.torretaCarga = 0; return; }
+  const px = limitar(blanco.x, ACOR.x1, ACOR.x2), py = limitar(blanco.y, ACOR.y1, ACOR.y2);
+  if (E.torretaCarga > 0) {
+    E.torretaCarga -= dt;
+    if (E.torretaCarga <= 0) {
+      const ox = px - 1, dx = blanco.x - ox, dy = blanco.y - py, d = Math.hypot(dx, dy) || 1;
+      proyectiles.push({ x: ox, y: py, vx: dx / d * 28, vy: dy / d * 28, bando: 'enemigo', jugador: false, dano: D.danoT, vida: 30 / 28, tipo: 'canon' });
+      SFX.canon(ox, py, blanco !== J);
+      E.torreta = 1.6 + Math.random();
+    }
+  } else {
+    E.torreta -= dt;
+    if (E.torreta <= 0) { E.torretaCarga = .7; SFX.cargaTorreta(px - 1, py, blanco !== J); }
+  }
+}
+
+function danarAcorazado(cant, x, y, delJugador, arma = 'laser') {
+  if (E.fortaleza) {
+    if (delJugador) {
+      SFX.deflector(x, y);
+      if (E.t > E.avisoEscudoAcor) { E.avisoEscudoAcor = E.t + 8; decir('El acorazado es inmune mientras exista la fortaleza.', false); }
+    }
+    return;
+  }
+  E.acorVida -= cant; SFX.impacto(x, y, !delJugador); if (delJugador) SFX.blindaje(x, y);
+  if (E.acorVida <= 0) {
+    E.st.golpeAcor = delJugador ? (arma === 'torpedo' ? 'tú, con un torpedo' : 'tú, con el láser') : 'un caza aliado Aspa';
+    destruirAcorazado(); return;
+  }
+  const nivel = Math.ceil(E.acorVida / ACOR.vidaMax * 4);
+  if (nivel < E.acorNivel) { E.acorNivel = nivel; decir('Casco del acorazado al ' + Math.round(E.acorVida / ACOR.vidaMax * 100) + ' por ciento.', false); }
+}
+
+function danarCrucero(cant) {
+  if (E.tutorial) { SFX.impactoCrucero(); return; }
+  E.cruVida -= cant; E.danoCru += cant; SFX.impactoCrucero();
+  if (E.cruVida <= 0) {
+    SFX.granExplosion(CRUCERO.x, CRUCERO.y);
+    terminar(false, '¡El crucero Vanguardia ha sido destruido por los bombarderos! ');
+    return;
+  }
+  const nivel = Math.ceil(E.cruVida / CRUCERO.vidaMax * 4);
+  if (nivel < E.cruNivel) {
+    E.cruNivel = nivel;
+    const pc = Math.round(E.cruVida / CRUCERO.vidaMax * 100);
+    radio('Vanguardia: ' + (pc <= 25 ? '¡alerta! ' : '') + 'casco al ' + pc + ' por ciento.', pc <= 25, true, 'casco');
+  }
+}
+
+// ================== PROYECTILES ==================
+function actualizarProyectiles(dt) {
+  for (const p of proyectiles) {
+    if (E.fase !== 'juego') break;
+    const ladoAntes = Math.sign(p.x - J.x);
+    p.x += p.vx * dt; p.y += p.vy * dt; p.vida -= dt;
+    if (p.tipo === 'bomba') {   // las bombas solo buscan el crucero y atraviesan su escudo
+      if (p.x <= CRUCERO.x2) { p.fin = true; danarCrucero(p.dano); }
+      else if (p.vida <= 0) p.fin = true;
+      continue;
+    }
+    if (p.vida <= 0 || p.x < 0 || p.x > ANCHO || p.y < 0 || p.y > ALTO) { p.fin = true; continue; }
+
+    if (E.fortaleza && dentro(p.x, p.y, FORT)) {
+      p.fin = true;
+      if (p.jugador) {
+        SFX.blindaje(p.x, p.y);
+        if (p.tipo === 'torpedo') decir(E.escudoFort ? 'El escudo de la fortaleza lo detiene.'
+                                                     : 'El blindaje resiste. Entra por el conducto, por debajo.');
+      }
+      continue;
+    }
+
+    if (p.bando === 'enemigo') {
+      if (p.x < 10) { p.fin = true; continue; }   // el escudo del crucero detiene los láseres
+      const jFuera = J.vivo && !J.enLab;
+      if (jFuera && Math.hypot(p.x - J.x, p.y - J.y) < .9) { p.fin = true; danarJugador(p.dano, false, p.tipo === 'canon' ? 'canonAcor' : 'disparos'); continue; }
+      if (jFuera && !p.cerca && Math.sign(p.x - J.x) !== ladoAntes && Math.abs(p.y - J.y) < 3) { p.cerca = true; SFX.casi(p.x, p.y); }
+      for (const o of naves) {
+        if (o.bando !== 'aliado' || o.muerto) continue;
+        if (Math.hypot(p.x - o.x, p.y - o.y) < .9) {
+          p.fin = true; o.vida--; SFX.impacto(o.x, o.y, true);
+          if (o.vida <= 0) matar(o, true, p.tipo === 'canon' ? 'canonAcor' : 'enemigo');
+          break;
+        }
+      }
+    } else {
+      const alcance = p.tipo === 'torpedo' ? 1.3 : .9;
+      for (const o of naves) {
+        if (o.bando !== 'enemigo' || o.muerto) continue;
+        if (Math.hypot(p.x - o.x, p.y - o.y) < alcance) {
+          if (o.tirador) { p.fin = true; SFX.deflector(o.x, o.y); break; }   // el de práctica no se puede derribar
+          p.fin = true; o.vida -= p.tipo === 'torpedo' ? 10 : 1; SFX.impacto(o.x, o.y, !p.jugador);
+          if (o.vida <= 0) {
+            matar(o, true, p.jugador ? 'jugador' : (p.causa || 'aliado'));
+            if (p.causa === 'canon' && o.tipo === 'bombardero') radio('Vanguardia: ¡bombardero derribado por nuestros cañones!', false, true, 'canon');
+            if (p.jugador) {
+              SFX.confirmar();
+              const nom = o.dron ? 'Dron' : o.tipo === 'bombardero' ? 'Bombardero' : 'Interceptor';
+              decir(E.acorVivo ? nom + ' derribado.' : nom + ' derribado. Quedan ' + enemigos().length + '.', o.tipo === 'bombardero');
+            }
+          }
+          break;
+        }
+      }
+      if (!p.fin && E.acorVivo && dentro(p.x, p.y, ACOR)) {
+        p.fin = true;
+        danarAcorazado(p.jugador ? p.dano : 1, p.x, p.y, p.jugador, p.tipo);
+      }
+    }
+  }
+  proyectiles = proyectiles.filter(p => !p.fin);
+}
+
+// ================== EVENTOS DE MISIÓN ==================
+// El equipo de tierra desactiva el escudo de la fortaleza
+const MENSAJES_TIERRA = [
+  [2 / 3, 'Equipo de tierra: llegamos al generador del escudo. ¡Aguantad!'],
+  [1 / 3, 'Equipo de tierra: colocando las cargas.'],
+  [0, 'Equipo de tierra: ¡diez segundos!'],
+];
+function actualizarEscudo(dt) {
+  if (!E.escudoFort) return;
+  E.escudoT -= dt;
+  const m = MENSAJES_TIERRA[E.avisoTierra];
+  if (m && (m[0] > 0 ? E.escudoT <= D.escudo * m[0] : E.escudoT <= 10)) {
+    E.avisoTierra++; radio(m[1], false, true, 'tierra');
+  }
+  if (E.escudoT <= 0) {
+    E.escudoFort = false;
+    SFX.escudoCae();
+    radio('Equipo de tierra: ¡escudo desactivado! El conducto está abierto.', true, true, 'tierra');
+  }
+}
+
+// Rayo letal: carga lenta hacia un lado y fulmina todo lo que hay en su línea
+const puntoRayo = b => [limitar(J.x, b.x1, b.x2), limitar(J.y, b.y1, b.y2)];
+function actualizarRayo(dt) {
+  const R = E.rayo;
+  // con el reactor herido, la fortaleza deja de disparar
+  if (!E.fortaleza || E.cuenta >= 0 || E.torpedoEnVuelo >= 0) { R.fase = 'espera'; R.t = D.rayoCada; return; }
+  R.t -= dt;
+  if (R.fase === 'espera') {
+    if (R.t > 0 || E.tutorial) return;   // en el entrenamiento, el rayo solo se carga cuando toca
+    const opciones = Object.keys(RAYOS).filter(k => k !== R.dir);
+    R.dir = opciones[Math.floor(Math.random() * opciones.length)];
+    R.fase = 'carga'; R.t = R.total = D.rayoCarga; R.avisado = false; R.enLinea = false;
+    for (const n of naves) n.reaccion = .3 + Math.random() * (D.rayoCarga + .6);
+    if (!J.enLab && J.vivo) decir('¡La fortaleza carga su rayo ' + RAYOS[R.dir].nombre + '!', true);
+  } else if (R.fase === 'carga') {
+    if (R.t > 0) return;
+    R.fase = 'fuego'; R.t = 1.2;
+    SFX.disparoRayo(...puntoRayo(RAYOS[R.dir]));
+  } else {
+    const b = RAYOS[R.dir];
+    if (E.tutorial) {
+      if (!J.enLab && dentro(J.x, J.y, b, .5) && !E.tutorial.alcanzado) { E.tutorial.alcanzado = true; SFX.danoJugador(); }
+    } else if (J.vivo && !J.enLab && J.invul <= 0 && dentro(J.x, J.y, b, .5)) {
+      morirJugador('¡El rayo de la fortaleza te ha fulminado!', '', 'rayo');
+      if (E.fase !== 'juego') return;
+    }
+    for (const n of naves) if (!n.muerto && dentro(n.x, n.y, b, .3)) matar(n, true, 'rayo');
+    if (R.t <= 0) { R.fase = 'espera'; R.t = D.rayoCada * (.8 + Math.random() * .4); }
+  }
+}
+
+// Cañones de defensa del crucero: disparan por turnos, sobre todo a los bombarderos que se acercan
+const CANONES_CRU = [{ x: 7, y: 23 }, { x: 7, y: 17 }];
+function actualizarDefensa(dt) {
+  E.cruCanonT -= dt;
+  if (E.cruCanonT > 0) return;
+  let blanco = null, md = Infinity;
+  for (const n of naves) {
+    if (n.bando !== 'enemigo' || n.muerto) continue;
+    const d = Math.hypot(n.x - CRUCERO.x, n.y - CRUCERO.y);
+    if (d > 26) continue;
+    const peso = n.tipo === 'bombardero' ? d * .5 : d;
+    if (peso < md) { md = peso; blanco = n; }
+  }
+  if (!blanco) { E.cruCanonT = .5; return; }
+  const c = CANONES_CRU[E.cruCanonLado]; E.cruCanonLado = 1 - E.cruCanonLado;
+  // apunta un poco por delante del blanco, adonde va a estar
+  const vel = 32, t = Math.hypot(blanco.x - c.x, blanco.y - c.y) / vel;
+  const dx = blanco.x + blanco.vx * t - c.x, dy = blanco.y + blanco.vy * t - c.y, d = Math.hypot(dx, dy) || 1;
+  proyectiles.push({ x: c.x, y: c.y, vx: dx / d * vel, vy: dy / d * vel, bando: 'aliado', jugador: false, dano: 1, vida: 30 / vel, tipo: 'canonCru', causa: 'canon' });
+  SFX.canonCru(c.x, c.y);
+  E.cruCanonT = D.cruCanon * (.85 + Math.random() * .3);
+}
+
+// Tus aliados te cuentan por radio cómo va la batalla (sin agobiar: como mucho uno cada 12 segundos)
+function actualizarInformesRadio(dt) {
+  E.danoCru *= Math.exp(-dt / 10);   // daño reciente del crucero: se olvida en unos 10 segundos
+  const cerca = naves.filter(n => !n.muerto && n.tipo === 'interceptor' && dist(n, ENTRADA) < 12).length;
+  if (cerca === 0) E.entradaTranquila += dt; else E.entradaTranquila = 0;
+  E.radioT -= dt;
+  if (E.radioT > 0 || !J.vivo) return;
+  const g = guardias().length, libres = aliados().filter(n => !n.guardia).length;
+  const nb = bombarderos().filter(n => n.x < 32).length;
+  const conducto = E.fortaleza && !E.escudoFort && E.cuenta < 0 && E.torpedoEnVuelo < 0;
+  const avisar = (tipo, espera, txt, urgente = false) => {
+    if (E.t < (E.radioAv[tipo] || 0)) return false;
+    E.radioAv[tipo] = E.t + espera; E.radioT = 12;
+    radio(txt, urgente, true, tipo);
+    return true;
+  };
+  if (nb && E.danoCru >= 8 &&
+      avisar('crucero', 30, 'Vanguardia: ¡nos machacan! ' + pl(nb, 'bombardero', 'bombarderos') + ', casco al ' +
+             Math.max(0, Math.round(E.cruVida / CRUCERO.vidaMax * 100)) + ' por ciento.' + (g ? ' Reduce la guardia si puedes.' : ' ¡Ayuda!'), true)) return;
+  if (conducto && cerca >= 3 && cerca > g &&
+      avisar('entrada', 30, !g ? 'Escuadrón: ' + cerca + ' interceptores en la entrada del conducto y nadie la custodia.'
+                               : E.guardiaPct >= .75 ? 'Guardia: ¡nos superan! ' + cerca + ' interceptores. Aguantaremos.'
+                               : 'Guardia: ¡nos superan! ' + cerca + ' interceptores contra ' + g + '. Manda más.')) return;
+  if (conducto && E.guardiaPct > 0 && E.entradaTranquila > 25 &&
+      avisar('tranquila', 50, 'Guardia: entrada tranquila. Puedes reducir la guardia.')) { E.entradaTranquila = 0; return; }
+  if (conducto && !bombarderos().length && libres >= Math.max(5, D.capA - 3) && E.guardiaPct < .75)
+    avisar('sobran', 60, 'Escuadrón: todo tranquilo, sobran cazas: ' + libres + ' libres.');
+}
+
+function actualizarMision(dt) {
+  if (E.tutorial) { actualizarMisionTutorial(dt); return; }
+  if (E.escolta > 0) { E.escolta -= dt; if (E.escolta <= 0) radio('Escuadrón: fin de la escolta.', false, true, 'orden'); }
+  actualizarEscudo(dt);
+  actualizarRayo(dt);
+  if (E.fase !== 'juego') return;
+  actualizarDefensa(dt);
+  actualizarInformesRadio(dt);
+
+  // Relevos para la guardia del conducto
+  if (E.fortaleza && E.guardiaPct > 0 && !E.retirada) {
+    E.relevoT -= dt;
+    if (E.relevoT <= 0 && guardias().length < guardiasQuiero()) {
+      E.relevoT = 2;
+      asignarGuardia(nuevaNave('aliado', 7, 14 + Math.random() * 12));
+      if (E.t > E.avisoRelevo) { E.avisoRelevo = E.t + 12; radio('Vanguardia: relevo en camino a la guardia.', false, true, 'relevo'); }
+    }
+  }
+
+  // Los interceptores que llegan a la boca del conducto entran detrás de ti
+  if (J.enLab && J.vivo) {
+    for (const n of naves) {
+      if (n.muerto || n.tipo !== 'interceptor' || L.enemigos.length >= D.labMax) continue;
+      if (dist(n, ENTRADA) < 1.6) meterEnLab(n);
+    }
+  }
+
+  // Salida continua de naves: interceptores mientras exista el acorazado, aliados siempre
+  if (E.acorVivo) {
+    E.spawnE -= dt;
+    if (E.spawnE <= 0) {
+      E.spawnE = D.spawnE;
+      if (enemigos().length - bombarderos().length < D.capE) nuevaNave('enemigo', 89, 15 + Math.random() * 10);
+    }
+    E.spawnB -= dt;
+    if (E.spawnB <= 0) {
+      E.spawnB = D.bombCada;
+      if (bombarderos().length < D.capB + (E.fortaleza ? 0 : 1)) {
+        nuevaNave('enemigo', 89, 16 + Math.random() * 8, 'bombardero');
+        radio('Vanguardia: bombardero en camino.', false, true, 'bombardero');
+      }
+    }
+  }
+  E.spawnA -= dt;
+  if (E.spawnA <= 0) { E.spawnA = D.spawnA; if (aliados().length < D.capA) nuevaNave('aliado', 7, 14 + Math.random() * 12); }
+
+  if (E.torpedoEnVuelo >= 0) {
+    E.torpedoEnVuelo -= dt;
+    if (E.torpedoEnVuelo < 0) {
+      // 15 segundos para alejarse, más el tiempo de desandar el laberinto
+      const tramos = L ? L.dEntrada[L.reactor.c][L.reactor.r] + 1 : 0;
+      E.cuenta = Math.ceil((CUENTA + tramos * D.segTramo) / 5) * 5; E.ultimaCuenta = E.cuenta + 1;
+      E.st.golpeFort = 'tú, con un torpedo en el reactor';
+      sonandoLab = J.enLab; SFX.explosion(CONDUCTO.x, FORT.y1, 1.5); sonandoLab = false;   // el reactor estalla a tu lado
+      if (J.enLab) decir('¡Impacto! Estalla en ' + E.cuenta + ' segundos. Sigue la baliza de dos tonos hasta la salida. R: avisar.', true, true);
+      else decir('¡Impacto! Estalla en ' + E.cuenta + ' segundos. R: avisar. ¡Aléjate!', true, true);
+    }
+  }
+  if (E.cuenta >= 0) {
+    E.cuenta -= dt;
+    const s = Math.ceil(E.cuenta);
+    if (s < E.ultimaCuenta && s > 0) {
+      E.ultimaCuenta = s; SFX.pitido(s <= 5); SFX.sirena();
+      if (s % 10 === 0 || s <= 5) decir(String(s));
+    }
+    if (E.cuenta <= 0) { E.cuenta = -1; explotarFortaleza(); }
+  }
+
+  if (!E.fortaleza && !E.acorVivo && enemigos().length === 0 && E.fase === 'juego') terminar(true);
+}
+
+function explotarFortaleza() {
+  const enLab = J.enLab;
+  if (enLab) salirLab(true);
+  E.fortaleza = false; E.retirada = false; E.escudoFort = false; E.guardiaPct = 0;
+  liberarGuardias();
+  E.mFort.detener(); E.mCond.detener(); E.zRayo.set(0);
+  SFX.granExplosion(FORT.cx, FORT.cy);
+  let atrapE = 0, atrapA = 0;
+  for (const n of naves) {
+    if (n.muerto || Math.hypot(n.x - FORT.cx, n.y - FORT.cy) > RADIO_EXPLOSION) continue;
+    if (n.bando === 'enemigo') atrapE++; else atrapA++;
+    matar(n, false, 'explosion');
+  }
+  let msg = '¡La Fortaleza Lunar ha sido destruida! ';
+  if (atrapE) msg += atrapE + (atrapE === 1 ? ' nave enemiga atrapada' : ' naves enemigas atrapadas') + ' en la explosión. ';
+  if (atrapA) msg += atrapA + (atrapA === 1 ? ' aliado no logró' : ' aliados no lograron') + ' escapar. ';
+  if (J.vivo && (enLab || Math.hypot(J.x - FORT.cx, J.y - FORT.cy) <= RADIO_EXPLOSION)) {
+    J.invul = 0;
+    morirJugador(enLab ? 'Seguías dentro del conducto cuando estalló.' : 'Estabas demasiado cerca y la explosión te alcanzó.', msg + 'Los escudos del acorazado han caído. ', 'explosion');
+    return;
+  }
+  msg += 'El acorazado ya no tiene escudos: destrúyelo, a la derecha.';
+  decir(msg, true, true);
+}
+
+function destruirAcorazado() {
+  E.acorVivo = false; E.mAcor.detener();
+  SFX.granExplosion(ACOR.cx, ACOR.cy);
+  const q = enemigos().length;
+  decir('¡El Acorazado Tirano ha sido destruido! Ya no saldrán más naves enemigas.' + (q ? ' Quedan ' + q + ': derríbalas.' : ''));
+}
+
+function terminar(victoria, prefijo = '') {
+  E.fase = 'fin';
+  if (J.enLab) salirLab(true);
+  callarVoces();
+  detenerTodo();
+  teclas.clear();
+  const pts = calcularPuntos(victoria);
+  E.informe = crearInforme(victoria, pts); E.iInforme = -1;
+  const lista = $('#informe-lista'); lista.textContent = '';
+  for (const l of E.informe) { const li = document.createElement('li'); li.textContent = l; lista.appendChild(li); }
+  $('#informe').hidden = false;
+  const tuyos = E.st.ti.interceptor + E.st.ti.bombardero;
+  const derribos = 'Derribaste ' + tuyos + (tuyos === 1 ? ' nave enemiga. ' : ' naves enemigas. ') + pts.total.toLocaleString('es') + ' puntos' + (pts.record ? ', ¡nuevo récord!' : '.') + ' ';
+  const ayuda = 'Flecha abajo: informe. C: copiarlo. Enter: otra partida.';
+  if (victoria) {
+    SFX.victoria();
+    decir(prefijo + '¡Victoria! La Coalición Libre ha ganado la Batalla de Orvan. ' + derribos + ayuda, true, true);
+    $('#estado-visual').textContent = 'Victoria. Pulsa Enter para jugar de nuevo.';
+  } else {
+    SFX.derrota();
+    decir(prefijo + (J.vidas <= 0 ? 'Has perdido todas tus vidas. ' : '') + 'Derrota. ' + derribos + ayuda, true, true);
+    $('#estado-visual').textContent = 'Derrota. Pulsa Enter para intentarlo de nuevo.';
+  }
+}
+
+// ================== INFORME DE MISIÓN ==================
+const pl = (n, uno, varios) => n + ' ' + (n === 1 ? uno : varios);
+function desglose(o) {
+  const p = [];
+  if (o.interceptor) p.push(pl(o.interceptor, 'interceptor', 'interceptores'));
+  if (o.bombardero) p.push(pl(o.bombardero, 'bombardero Martillo', 'bombarderos Martillo'));
+  return p.join(' y ');
+}
+// Puntuación: derribos, objetivos y, si ganas, el estado del crucero, tus vidas y la rapidez; multiplicada por la dificultad
+const MULT = { facil: 1, normal: 1.5, dificil: 2 };
+const claveDif = () => Object.keys(DIF).find(k => DIF[k] === D) || 'normal';
+function calcularPuntos(victoria) {
+  const s = E.st;
+  const derribos = s.ti.interceptor * 100 + s.tiLab * 50 + s.ti.bombardero * 250;
+  const objetivos = (s.golpeFort ? 2000 : 0) + (!E.acorVivo ? 3000 : 0) + (s.golpeAcor && s.golpeAcor.startsWith('tú') ? 500 : 0);
+  const triunfo = victoria ? 2000 + Math.round(Math.max(0, E.cruVida) / CRUCERO.vidaMax * 2000) + J.vidas * 500 + Math.max(0, Math.round((600 - E.t) * 3)) : 0;
+  const bajas = s.aliCaidos * 20;
+  const mult = MULT[claveDif()];
+  const total = Math.max(0, Math.round((derribos + objetivos + triunfo - bajas) * mult));
+  let anterior = 0;
+  try { anterior = +(localStorage.getItem('orvan-record-' + claveDif()) || 0); } catch (e) {}
+  const record = total > anterior;
+  if (record) { try { localStorage.setItem('orvan-record-' + claveDif(), String(total)); } catch (e) {} }
+  return { total, derribos, objetivos, triunfo, bajas, mult, record, anterior };
+}
+// "5 por disparos enemigos, 2 por los cañones del acorazado y 1 por el rayo"
+const NOMBRE_CAUSA = { disparos: 'por disparos enemigos', enemigo: 'por disparos enemigos', canonAcor: 'por los cañones del acorazado',
+                       rayo: 'por el rayo', perimetro: 'en el perímetro', explosion: 'en la explosión de la fortaleza' };
+function textoCausas(c) {
+  const juntas = {};
+  for (const [k, v] of Object.entries(c)) { const nom = NOMBRE_CAUSA[k] || 'por otras causas'; juntas[nom] = (juntas[nom] || 0) + v; }
+  const l = Object.entries(juntas).sort((a, b) => b[1] - a[1]).map(([nom, v]) => v + ' ' + nom);
+  return l.length <= 1 ? l.join('') : l.slice(0, -1).join(', ') + ' y ' + l[l.length - 1];
+}
+function crearInforme(victoria, pts) {
+  const s = E.st;
+  const min = Math.floor(E.t / 60), seg = Math.floor(E.t % 60);
+  const dur = (min ? pl(min, 'minuto', 'minutos') + ' y ' : '') + pl(seg, 'segundo', 'segundos');
+  const ti = s.ti.interceptor + s.ti.bombardero, al = s.ali.interceptor + s.ali.bombardero;
+  const otras = [];
+  if (s.otras.canon) otras.push(pl(s.otras.canon, 'derribada', 'derribadas') + ' por los cañones del Vanguardia');
+  if (s.otras.explosion) otras.push(s.otras.explosion + ' en la explosión de la fortaleza');
+  if (s.otras.rayo) otras.push(pl(s.otras.rayo, 'fulminada', 'fulminadas') + ' por el rayo');
+  if (s.otras.perimetro) otras.push(pl(s.otras.perimetro, 'quemada', 'quemadas') + ' en el perímetro');
+  const cru = Math.max(0, Math.round(E.cruVida / CRUCERO.vidaMax * 100));
+  const n = v => v.toLocaleString('es');
+  return [
+    'Resultado: ' + (victoria ? 'victoria' : 'derrota') + ', dificultad ' + D.nombre + ', batalla de ' + dur + '.',
+    'Puntuación: ' + n(pts.total) + ' puntos. ' + (pts.record ? (pts.anterior ? '¡Nuevo récord! El anterior era ' + n(pts.anterior) + '.' : '¡Primer récord en ' + D.nombre + '!') : 'Tu récord en ' + D.nombre + ' es ' + n(pts.anterior) + '.'),
+    'Cómo se calcula: derribos ' + n(pts.derribos) + ', objetivos ' + n(pts.objetivos) + (victoria ? ', victoria ' + n(pts.triunfo) : '') + (pts.bajas ? ', aliados caídos menos ' + n(pts.bajas) : '') + '; por dificultad ' + D.nombre + ', por ' + String(pts.mult).replace('.', ',') + '.',
+    'Bajas causadas por ti: ' + (ti ? ti + '. ' + desglose(s.ti) + (s.tiLab ? '; ' + s.tiLab + ' dentro del conducto' : '') : 'ninguna') + '.',
+    'Bajas causadas por tus aliados: ' + (al ? al + '. ' + desglose(s.ali) : 'ninguna') + '.',
+    'Otras bajas enemigas: ' + (otras.length ? otras.join(', ') : 'ninguna') + '.',
+    'Tus pérdidas: ' + (s.derribado ? 'te derribaron ' + pl(s.derribado, 'vez', 'veces') + ': ' + textoCausas(s.causasJ) : 'no te derribaron ni una vez') + '.',
+    'Aliados caídos: ' + (s.aliCaidos ? s.aliCaidos + ': ' + textoCausas(s.causasA) + (s.guardCaidos ? '; ' + s.guardCaidos + ' de ellos custodiando el conducto' : '') : 'ninguno') + '.',
+    'Crucero Vanguardia: ' + (cru > 0 ? 'casco al ' + cru + ' por ciento.' : 'destruido.'),
+    'Golpe de gracia a la Fortaleza Lunar: ' + (s.golpeFort || 'nadie, la fortaleza sigue en pie') + '.',
+    'Golpe de gracia al Acorazado Tirano: ' + (s.golpeAcor || 'nadie, el acorazado sigue en pie') + '.',
+  ];
+}
+
+// ================== ENTRENAMIENTO ==================
+// Cada paso tiene sus instrucciones (texto), prepara la escena (inicio) y comprueba si ya lo conseguiste (hecho).
+// En el entrenamiento no se pierden escudos ni vidas, no aparecen enemigos por sorpresa y el rayo solo se carga cuando toca.
+const TU = () => E.tutorial;
+function quitar(n) { n.muerto = true; if (n.motor) { n.motor.detener(); n.motor = null; } }
+function crearDron(x, y) { const n = nuevaNave('enemigo', limitar(x, 16, 85), limitar(y, 3, 37)); n.dron = true; return n; }
+// te lleva a otro sitio del mapa, con un soplido para que sepas que has saltado
+function teletransportar(x, y) {
+  J.x = x; J.y = y; J.dir = x < 60 ? 1 : -1;
+  sonido({ ruido: true, dur: .45, vol: .3, filtro: { tipo: 'bandpass', f0: 400, f1: 2500 } });
+}
+const RAYOS_TUT = [
+  { dir: 'izquierda', x: 30, y: 20, txt: '' },
+  { dir: 'abajo', x: 50, y: 8, txt: 'Ahora estás debajo de la fortaleza y el rayo irá hacia abajo. Esta vez sal moviéndote a la izquierda o a la derecha.' },
+];
+function prepararRayoTut() {
+  const r = RAYOS_TUT[TU().ri], R = E.rayo;
+  teletransportar(r.x, r.y);
+  TU().alcanzado = false; TU().vioFuego = false;
+  if (r.txt) decir(r.txt, true, true);
+  R.dir = r.dir; R.fase = 'carga'; R.t = R.total = 6; R.avisado = false; R.enLinea = false;
+}
+const PASOS = [
+  { texto: 'Paso 1 de 7, moverte. Las flechas mueven tu nave. Sigue la baliza: suena desde el punto de encuentro, aguda si está arriba, grave si está abajo, y más rápida cuanto más cerca. C te dice tu posición.',
+    inicio() { TU().metas = [[24, 30], [30, 10]]; TU().ping = 0; },
+    hecho(dt) {
+      const m = TU().metas[0], d = Math.hypot(m[0] - J.x, m[1] - J.y);
+      TU().ping -= dt;
+      if (TU().ping <= 0) { sonido({ x: m[0], y: m[1], tipo: 'triangle', f0: 1100, dur: .08, vol: .45, rango: 120 }); TU().ping = .15 + Math.min(d, 40) / 40 * 1.1; }
+      if (d < 2.5) {
+        TU().metas.shift(); SFX.confirmar();
+        if (TU().metas.length) decir('¡Llegaste! Ahora sigue la baliza hasta el segundo punto.', true);
+      }
+      return !TU().metas.length;
+    } },
+  { texto: 'Paso 2 de 7, disparar. Hay un dron de práctica delante de ti, a tu altura. Cuando oigas el radar de mira, un pitido vibrante, pulsa Espacio. Izquierda y derecha cambian hacia dónde apuntas. E te dice dónde está el dron.',
+    inicio() { const lado = J.x < 60 ? 1 : -1; J.dir = lado; TU().drones = [crearDron(J.x + lado * 14, J.y)]; TU().segundo = false; },
+    hecho() {
+      const vivos = TU().drones.filter(d => !d.muerto).length;
+      if (!vivos && !TU().segundo) {
+        TU().segundo = true;
+        const lado = J.x < 60 ? 1 : -1, y = J.y < 20 ? J.y + 7 : J.y - 7;
+        TU().drones = [crearDron(J.x + lado * 14, y)];
+        decir('Ahora hay otro dron, más ' + (y > J.y ? 'arriba' : 'abajo') + '. Muévete hasta su altura: sabrás que estás bien cuando oigas la mira.', false);
+        return false;
+      }
+      return !vivos && TU().segundo;
+    } },
+  { texto: 'Paso 3 de 7, esquivar. Un interceptor de práctica te va a disparar. Cuando oigas tres pitidos rápidos que suben, te está apuntando: muévete arriba o abajo. Esquiva 3 disparos. Aquí no pierdes escudos.',
+    inicio() {
+      TU().disparos = 0; TU().golpes = 0; TU().golpesDichos = 0;
+      const n = nuevaNave('enemigo', limitar(J.x + (J.x < 60 ? 13 : -13), 16, 85), J.y); n.tirador = true; n.enfriar = 2.5; TU().tirador = n;
+    },
+    hecho() {
+      if (TU().golpes > TU().golpesDichos) { TU().golpesDichos = TU().golpes; decir('Te dio. Muévete en cuanto oigas los tres pitidos.', false, false, 'tut'); }
+      const esquivas = TU().disparos - TU().golpes;
+      if (esquivas > (TU().esquivasDichas || 0) && !proyectiles.some(p => p.bando === 'enemigo')) {
+        TU().esquivasDichas = esquivas;
+        if (esquivas < 3) decir('¡Esquivado! Van ' + esquivas + ' de 3.', false, false, 'tut');
+      }
+      if (esquivas >= 3 && !proyectiles.some(p => p.bando === 'enemigo')) { quitar(TU().tirador); return true; }
+      return false;
+    } },
+  { texto: 'Paso 4 de 7, el rayo de la fortaleza. Te he llevado a la izquierda de la fortaleza, justo en la línea de su rayo. Cuando oigas que carga, sal de la línea subiendo o bajando, hasta oír el tono de a salvo.',
+    inicio() { TU().ri = 0; TU().pausaRayo = 0; prepararRayoTut(); },
+    hecho(dt) {
+      const R = E.rayo;
+      if (R.fase === 'fuego') TU().vioFuego = true;
+      if (TU().pausaRayo > 0) { TU().pausaRayo -= dt; if (TU().pausaRayo <= 0) prepararRayoTut(); return false; }
+      if (!TU().vioFuego || R.fase !== 'espera') return false;
+      TU().vioFuego = false;
+      if (TU().alcanzado) { decir('Te alcanzó: en una batalla habrías perdido una vida. Vamos otra vez.', true); TU().pausaRayo = 3; return false; }
+      TU().ri++;
+      if (TU().ri >= RAYOS_TUT.length) return true;
+      decir('¡Esquivado!', true); TU().pausaRayo = 2;
+      return false;
+    } },
+  { texto: 'Paso 5 de 7, bombarderos. Te he llevado al hangar de tu crucero. Un bombardero de práctica viene desde la derecha a bombardearlo. Aguanta mucho láser, pero un torpedo lo destruye de un golpe. Ponte a su altura con ayuda de la mira y pulsa T. B te dice dónde está.',
+    inicio() { teletransportar(8, 20); J.torpedos = MAX_TORPEDOS; TU().bomb = nuevaNave('enemigo', 70, 20, 'bombardero'); },
+    hecho() { return TU().bomb.muerto; } },
+  { texto: 'Paso 6 de 7, la guardia. Han llegado cazas aliados. En la batalla, G manda una parte a custodiar la entrada del conducto, y Mayúsculas más G reduce la guardia. Pruébalo: pulsa G y después Mayúsculas más G. Tus aliados te contestan por radio.',
+    inicio() { for (let i = 0; i < 6; i++) nuevaNave('aliado', 9 + Math.random() * 6, 12 + Math.random() * 16); TU().subio = TU().bajo = false; },
+    hecho() { return TU().subio && TU().bajo; } },
+  { texto: 'Paso 7 de 7, el conducto. El escudo de la fortaleza ya está apagado. Te he llevado debajo de ella: sube hasta el conducto, guiándote con su baliza o con F. Dentro, sigue la baliza hasta el reactor y pulsa T. Luego sigue la baliza de dos tonos hasta la salida.',
+    inicio() { E.escudoFort = false; L = crearLab(3); J.torpedos = Math.max(J.torpedos, 2); TU().impacto = false; teletransportar(50, 8); },
+    hecho() { return TU().impacto && !J.enLab; } },
+];
+function actualizarMisionTutorial(dt) {
+  const tu = TU();
+  actualizarRayo(dt);
+  if (E.torpedoEnVuelo >= 0) {
+    E.torpedoEnVuelo -= dt;
+    if (E.torpedoEnVuelo < 0) {
+      E.cuenta = 999; tu.impacto = true;   // sin cuenta atrás de verdad: solo para que la baliza te lleve a la salida
+      sonandoLab = J.enLab; SFX.explosion(CONDUCTO.x, FORT.y1, 1.5); sonandoLab = false;
+      decir('¡Impacto en el reactor! En una batalla, ahora empezaría la cuenta atrás. Sigue la baliza de dos tonos hasta la salida.', true, true);
+    }
+  }
+  if (tu.espera > 0) { tu.espera -= dt; if (tu.espera <= 0) empezarPaso(tu.paso + 1); return; }
+  const p = PASOS[tu.paso];
+  if (p && p.hecho(dt)) { limpiarPaso(); SFX.acorde([523, 659, 784], .1, .3, .22); decir('¡Bien hecho!', true); tu.espera = 2.5; }
+}
+function empezarPaso(i) {
+  if (i >= PASOS.length) { terminarEntrenamiento(); return; }
+  TU().paso = i;
+  decir(PASOS[i].texto, true, true);
+  PASOS[i].inicio();
+}
+// quita lo que haya dejado el paso: enemigos de práctica, el rayo y el laberinto
+function limpiarPaso() {
+  if (J.enLab) salirLab(true);
+  naves.filter(n => n.bando === 'enemigo').forEach(quitar);
+  proyectiles = proyectiles.filter(p => p.bando !== 'enemigo');
+  E.rayo.fase = 'espera'; E.cuenta = -1; E.torpedoEnVuelo = -1; L = null;
+}
+function saltarPaso() {
+  const tu = TU();
+  if (tu.espera > 0) return;
+  limpiarPaso(); decir('Saltas este paso.', true); tu.espera = 1;
+}
+function terminarEntrenamiento() {
+  E.fase = 'menu';
+  if (J.enLab) salirLab(true);
+  callarVoces(); detenerTodo(); teclas.clear();
+  SFX.victoria();
+  decir('¡Entrenamiento completado! En la batalla, además, tendrás que aguantar hasta que caiga el escudo de la fortaleza, escuchar la radio de tus aliados y destruir al final el Acorazado Tirano. Enter: empezar una batalla. D: dificultad. M: sonidos.', true, true);
+  $('#estado-visual').textContent = 'Entrenamiento completado. Pulsa Enter para empezar una batalla.';
+}
+// Q en pausa: dejar la partida o el entrenamiento y volver al menú
+function abandonarPartida() {
+  E.fase = 'menu'; E.pausa = false;
+  if (J.enLab) salirLab(true);
+  callarVoces(); detenerTodo(); teclas.clear();
+  fijarGain(busJuego.gain, 1); fijarGain(busLab.gain, 1);
+  decir('Has salido de la partida. Enter: batalla. E: entrenamiento. D: dificultad. M: sonidos.', true, true);
+  $('#estado-visual').textContent = 'Pulsa Enter para empezar una batalla.';
+}
+
+// D: cambiar la dificultad sin salir del juego (se guarda para la próxima vez)
+function cambiarDificultad() {
+  const orden = ['facil', 'normal', 'dificil'], sel = $('#dificultad');
+  sel.value = orden[(orden.indexOf(sel.value) + 1) % orden.length];
+  try { localStorage.setItem('orvan-dificultad', sel.value); } catch (e) {}
+  let rec = 0; try { rec = +(localStorage.getItem('orvan-record-' + sel.value) || 0); } catch (e) {}
+  decir('Dificultad: ' + DIF[sel.value].nombre + '.' + (rec ? ' Récord: ' + rec.toLocaleString('es') + '.' : '') + (E.fase === 'juego' ? ' Se usará en la próxima partida.' : ' Enter para empezar.'));
+}
+
+// C: copiar el informe para compartirlo
+function textoInforme() { return 'Batalla de Orvan: informe de misión\n' + (E.informe || []).join('\n'); }
+function copiarInforme() {
+  const txt = textoInforme();
+  const bien = () => decir('Informe copiado. Ya puedes pegarlo donde quieras con Control más V.');
+  const viejo = () => {
+    // método clásico: aprovecha el evento de copiar sin mover el foco del juego
+    let ok = false;
+    const alCopiar = e => { e.clipboardData.setData('text/plain', txt); e.preventDefault(); ok = true; };
+    document.addEventListener('copy', alCopiar);
+    try { document.execCommand('copy'); } catch (e) {}
+    document.removeEventListener('copy', alCopiar);
+    if (ok) bien(); else decir('No se pudo copiar. El informe está también en la página, debajo del juego.');
+  };
+  const portapapeles = typeof navigator !== 'undefined' && navigator.clipboard;
+  if (portapapeles && window.isSecureContext) portapapeles.writeText(txt).then(bien, viejo);
+  else viejo();
+}
+
+// ================== AUDIO CONTINUO ==================
+function actualizarAudio(dt) {
+  E.mJug.fijo(J.vivo ? (J.moviendo ? 1 : .6) : 0, J.moviendo ? 1.25 : 1);
+  E.mCru.posicionar(CRUCERO.x, CRUCERO.y);
+  if (E.fortaleza) {
+    // dentro del conducto, el retumbar de la fortaleza te rodea
+    if (J.enLab) E.mFort.fijo(.8, .9);
+    else E.mFort.posicionar(limitar(J.x, FORT.x1, FORT.x2), limitar(J.y, FORT.y1, FORT.y2));
+    E.mCond.fijo(J.enReactor ? 1 : 0);
+  }
+  if (E.acorVivo) E.mAcor.posicionar(limitar(J.x, ACOR.x1, ACOR.x2), limitar(J.y, ACOR.y1, ACOR.y2));
+
+  // Solo suenan los motores de las naves más cercanas, para no saturar
+  const porDist = (a, b) => dist(a, J) - dist(b, J);
+  // Se crea el motor al entrar entre las N más cercanas y se apaga al salir (con margen para no parpadear)
+  const gestionar = (lista, max) => lista.sort(porDist).forEach((n, i) => {
+    const rango = MOTORES[MOTOR_DE[n.tipo]].rango, d = dist(n, J);
+    if (!n.motor && i < max && d < rango) n.motor = new Motor(MOTOR_DE[n.tipo]);
+    if (n.motor && (i >= max + (modoLigero ? 0 : 1) || d > rango + 5)) { n.motor.detener(); n.motor = null; }
+    if (n.motor) n.motor.posicionar(n.x, n.y, i < max ? 1 : 0);
+  });
+  // en modo ligero suenan menos motores a la vez
+  gestionar(bombarderos(), modoLigero ? 1 : 2);
+  gestionar(enemigos().filter(n => n.tipo !== 'bombardero'), modoLigero ? 2 : 4);
+  gestionar(aliados(), modoLigero ? 2 : 3);
+
+  if (!J.vivo) { E.mira.set(0); E.perim.set(0); E.zRayo.set(0); return; }
+  if (J.enLab) { sonandoLab = true; audioLab(dt); sonandoLab = false; return; }
+
+  // Baliza del conducto (solo cuando ha caído el escudo)
+  if (E.fortaleza && !E.escudoFort && E.cuenta < 0 && E.torpedoEnVuelo < 0) {
+    E.ping -= dt;
+    if (E.ping <= 0) { SFX.ping(); E.ping = .12 + Math.min(dist(J, CONDUCTO), 60) / 60 * 1.1; }
+  }
+
+  audioRayo(dt);
+
+  // Perímetro: zumbido eléctrico desde el lado del peligro (más fuerte y agudo al acercarte); alarma si estás dentro
+  let volP = 0, panP = 0, tonoP = 1;
+  if (E.fortaleza) {
+    let banda = null, md = Infinity;
+    for (const b of bandas()) { const d = distRect(J.x, J.y, b); if (d < md) { md = d; banda = b; } }
+    if (md < 4) {
+      const cerca = 1 - md / 4;
+      volP = Math.pow(cerca, 1.3) * .8 + (J.enZona ? .2 : 0);
+      tonoP = 1 + cerca * .5;
+      panP = limitar((limitar(J.x, banda.x1, banda.x2) - J.x) / 3, -1, 1);
+    }
+  }
+  E.perim.set(volP, panP, tonoP);
+  if (J.enZona) { E.alarma -= dt; if (E.alarma <= 0) { SFX.alarma(); E.alarma = .3; } }
+
+  // Mira: pitido de radar continuo mientras haya un blanco en tu línea de tiro (vibra más rápido si está cerca)
+  let mejorOx = Infinity;
+  for (const n of naves) {
+    if (n.bando !== 'enemigo' || n.muerto) continue;
+    const ox = (n.x - J.x) * J.dir;
+    if (ox > 0 && ox < 30 && Math.abs(n.y - J.y) < 1 && ox < mejorOx) mejorOx = ox;
+  }
+  if (mejorOx < Infinity) E.mira.set(1, J.dir * .35, 1, 8 + (1 - mejorOx / 30) * 10);
+  else if (E.acorVivo && !E.fortaleza && J.dir > 0 && J.y >= ACOR.y1 && J.y <= ACOR.y2 && ACOR.x1 - J.x < 35) E.mira.set(.9, .35, .667, 5);
+  else E.mira.set(0);
+}
+
+// Carga del rayo: más fuerte cuanto más cerca de su línea; dentro de ella, pitidos rápidos de peligro
+function audioRayo(dt) {
+  const R = E.rayo;
+  if (R.fase !== 'carga') { E.zRayo.set(0); return; }
+  const b = RAYOS[R.dir], k = 1 - R.t / R.total;
+  const enL = dentro(J.x, J.y, b, .5), d = distRect(J.x, J.y, b);
+  const pan = enL ? 0 : limitar((limitar(J.x, b.x1, b.x2) - J.x) / 6, -1, 1);
+  E.zRayo.set(enL ? 1 : Math.max(.3, 1 - d / 30), pan, 1 + k * 3, 3 + k * 14);
+  if (enL) {
+    E.rayoBip -= dt;
+    if (E.rayoBip <= 0) { SFX.peligroRayo(); E.rayoBip = .16; }
+    if (!R.avisado) { R.avisado = true; decir('¡Estás en la línea del rayo! ¡Sal!', true, true); }
+  } else if (R.enLinea) SFX.aSalvo();
+  R.enLinea = enL;
+}
+
+// Guía del laberinto: hacia dónde hay que ir y cuántos tramos faltan (al reactor o, tras el torpedo, a la salida)
+function guiaLab() {
+  const haciaSalida = E.cuenta >= 0 || E.torpedoEnVuelo >= 0;
+  const d = haciaSalida ? L.dEntrada : L.dReactor;
+  const pasos = d[L.pc][L.pr] + (haciaSalida ? 1 : 0);
+  let siguiente = null;
+  if (haciaSalida && enEntrada(L.pc, L.pr)) siguiente = 'abajo';
+  else for (const nom of L.ab[L.pc][L.pr]) {
+    if (d[L.pc + DIRS[nom][0]][L.pr + DIRS[nom][1]] < d[L.pc][L.pr]) { siguiente = nom; break; }
+  }
+  return { haciaSalida, pasos, siguiente };
+}
+
+// Sonido dentro del laberinto: baliza, motores de los intrusos y mira
+function audioLab(dt) {
+  E.perim.set(0); E.zRayo.set(0);
+  const g = guiaLab();
+  L.ping -= dt;
+  if (L.ping <= 0 && g.pasos > 0 && g.siguiente) {
+    SFX.pingLab(g.siguiente, g.haciaSalida);
+    L.ping = .2 + Math.min(g.pasos, 14) / 14 * 1.0;
+  }
+  for (const en of L.enemigos) {
+    if (!en.motor) en.motor = new Motor('enemigo', busLab);
+    en.motor.posicionar(...posLab(en.c, en.r));
+  }
+  let mejor = Infinity;
+  [[L.pc, L.pr], ...linea(L.pc, L.pr, L.apunta, 8)].forEach(([c, r], i) => {
+    if (i < mejor && L.enemigos.some(en => en.c === c && en.r === r)) mejor = i;
+  });
+  if (mejor < Infinity) E.mira.set(1, L.apunta === 'izquierda' ? -.35 : L.apunta === 'derecha' ? .35 : 0, 1, 8 + (1 - Math.min(mejor, 6) / 6) * 10);
+  else E.mira.set(0);
+}
+
+// ================== BUCLE ==================
+let ultimo = 0, idBucle = 0;
+function bucle(ts) {
+  if (E.fase !== 'juego') return;
+  const dt = Math.min(.05, (ts - ultimo) / 1000); ultimo = ts;
+  if (!E.pausa) {
+    E.t += dt;
+    actualizarJugador(dt);
+    if (E.fase !== 'juego') return;
+    for (const n of naves) if (!n.muerto) actualizarNave(n, dt);
+    actualizarTorreta(dt);
+    actualizarProyectiles(dt);
+    if (E.fase !== 'juego') return;
+    actualizarMision(dt);
+    if (E.fase !== 'juego') return;
+    naves = naves.filter(n => !n.muerto);
+    actualizarAudio(dt);
+  }
+  idBucle = requestAnimationFrame(bucle);
+}
+
+// ================== INFORMACIÓN ==================
+const INFO = {
+  s() {
+    const apunta = J.enLab ? (L.apunta === 'arriba' || L.apunta === 'abajo' ? 'hacia ' : 'a la ') + L.apunta : 'a la ' + (J.dir > 0 ? 'derecha' : 'izquierda');
+    const g = guardias().length;
+    decir('Escudos ' + Math.max(0, Math.round(J.escudos)) + ' por ciento. ' + J.vidas + (J.vidas === 1 ? ' vida. ' : ' vidas. ') + J.torpedos + (J.torpedos === 1 ? ' torpedo.' : ' torpedos.') +
+          ' Crucero al ' + Math.max(0, Math.round(E.cruVida / CRUCERO.vidaMax * 100)) + ' por ciento. Apuntas ' + apunta + '.' +
+          (E.guardiaPct > 0 ? ' Guardia del conducto: ' + pl(g, 'caza', 'cazas') + '.' : ''));
+  },
+  b() {
+    const l = bombarderos();
+    if (!l.length) { decir('No hay bombarderos. Crucero al ' + Math.round(E.cruVida / CRUCERO.vidaMax * 100) + ' por ciento.'); return; }
+    l.sort((a, b) => dist(a, J) - dist(b, J));
+    decir(l.length + (l.length === 1 ? ' bombardero' : ' bombarderos') + '. Más cercano: ' + rel(l[0].x - J.x, l[0].y - J.y) + '. Crucero al ' + Math.round(E.cruVida / CRUCERO.vidaMax * 100) + ' por ciento.');
+  },
+  c() {
+    // posición en formato x, y
+    if (J.enLab) {
+      decir((L.pc + 1) + ', ' + (L.pr + 1) + '. Salidas: ' + textoSalidas(L.pc, L.pr) + '.' + (enEntrada(L.pc, L.pr) ? ' Abajo sales al exterior.' : ''));
+      return;
+    }
+    decir(Math.round(J.x) + ', ' + Math.round(J.y));
+  },
+  // dónde está el crucero Vanguardia
+  x() {
+    const casco = ' Casco al ' + Math.max(0, Math.round(E.cruVida / CRUCERO.vidaMax * 100)) + ' por ciento.';
+    if (J.enLab) { decir('Estás dentro del conducto. El crucero Vanguardia está fuera, a la izquierda del todo: primero sal por la entrada del laberinto.' + casco); return; }
+    if (J.x < 10) { decir('Estás en el hangar del crucero Vanguardia.' + casco); return; }
+    decir('Crucero Vanguardia, en ' + CRUCERO.x + ', ' + CRUCERO.y + ': ' + rel(CRUCERO.x - J.x, CRUCERO.y - J.y) + '. Su hangar está a la izquierda del todo, donde x es menor que 10.' + casco);
+  },
+  f() {
+    if (!E.fortaleza) { decir('La fortaleza ya ha sido destruida.'); return; }
+    if (J.enLab) {
+      const g = guiaLab();
+      if (!g.haciaSalida && J.enReactor) { decir('Estás sobre el reactor. Pulsa T.'); return; }
+      const donde = g.haciaSalida ? 'Salida: abajo de la entrada, en ' + (L.entrada.c + 1) + ', 1' : 'Reactor: en ' + (L.reactor.c + 1) + ', ' + (L.reactor.r + 1);
+      decir(donde + '. Te ' + (g.pasos === 1 ? 'falta 1 tramo' : 'faltan ' + g.pasos + ' tramos') + '. Siguiente paso: ' + g.siguiente + '.');
+      return;
+    }
+    let t = 'Conducto: ' + rel(CONDUCTO.x - J.x, CONDUCTO.y - J.y) + '.';
+    if (E.escudoFort) t += ' Está cerrado por el escudo de la fortaleza: faltan unos ' + Math.ceil(E.escudoT) + ' segundos para que el equipo de tierra lo desactive.';
+    else if (J.y >= ZONA.y1 - .5 && Math.abs(J.x - FORT.cx) < 9) t += ' Cuidado: estás a la altura del perímetro. Baja primero y acércate por debajo.';
+    decir(t);
+  },
+  e() {
+    if (J.enLab) {
+      const fuera = enemigos().length;
+      if (!L.enemigos.length) { decir('No hay interceptores dentro del conducto. Fuera hay ' + fuera + ' enemigos.'); return; }
+      const en = L.enemigos.slice().sort((a, b) => Math.hypot(a.c - L.pc, a.r - L.pr) - Math.hypot(b.c - L.pc, b.r - L.pr))[0];
+      decir(pl(L.enemigos.length, 'interceptor', 'interceptores') + ' dentro del conducto. El más cercano, contando en tramos: ' + rel(en.c - L.pc, en.r - L.pr) + '.');
+      return;
+    }
+    const l = enemigos();
+    if (!l.length) { decir('No hay naves enemigas.'); return; }
+    l.sort((a, b) => dist(a, J) - dist(b, J));
+    const nb = l.filter(n => n.tipo === 'bombardero').length;
+    decir('Enemigo más cercano, ' + NOMBRE[l[0].tipo] + ': ' + rel(l[0].x - J.x, l[0].y - J.y) + '. ' + (l.length - nb) + ' interceptores y ' + nb + (nb === 1 ? ' bombardero.' : ' bombarderos.'));
+  },
+  a() {
+    const l = aliados();
+    if (!l.length) { decir('No te quedan aliados en el campo.'); return; }
+    l.sort((a, b) => dist(a, J) - dist(b, J));
+    let t = l.length + (l.length === 1 ? ' aliado' : ' aliados') + '. Más cercano: ' + rel(l[0].x - J.x, l[0].y - J.y) + '.';
+    if (E.retirada) t += ' En retirada.'; else if (E.escolta > 0) t += ' Escoltándote.';
+    // cómo va la situación
+    if (E.fortaleza && !E.escudoFort) {
+      const g = guardias().length, cerca = enemigos().filter(n => n.tipo === 'interceptor' && dist(n, ENTRADA) < 12).length;
+      t += ' Guardia del conducto: ' + (g ? pl(g, 'caza', 'cazas') : 'ninguna') + '; ' + (cerca ? pl(cerca, 'interceptor', 'interceptores') + ' cerca de la entrada.' : 'entrada despejada.');
+    }
+    const nb = bombarderos().length;
+    t += ' Crucero al ' + Math.max(0, Math.round(E.cruVida / CRUCERO.vidaMax * 100)) + ' por ciento' + (nb ? ', ' + pl(nb, 'bombardero', 'bombarderos') + ' en el campo.' : ', sin bombarderos.');
+    decir(t);
+  },
+  d() {
+    if (!E.acorVivo) { decir('El acorazado ya ha sido destruido.'); return; }
+    const px = limitar(J.x, ACOR.x1, ACOR.x2), py = limitar(J.y, ACOR.y1, ACOR.y2);
+    decir('Acorazado Tirano: ' + rel(px - J.x, py - J.y) + '. ' + (E.fortaleza ? 'Escudos activos.' : 'Casco al ' + Math.round(E.acorVida / ACOR.vidaMax * 100) + ' por ciento.'));
+  },
+  o() {
+    if (E.tutorial) { const p = PASOS[E.tutorial.paso]; decir(p ? p.texto : 'Preparando el siguiente paso.'); return; }
+    const g = guardias().length;
+    const txtGuardia = E.guardiaPct > 0 ? ' Custodian la entrada ' + pl(g, 'caza', 'cazas') + '.' : ' Nadie custodia la entrada: pulsa G para poner guardia.';
+    if (J.enLab && E.cuenta < 0 && E.torpedoEnVuelo < 0)
+      decir('Objetivo: encuentra el reactor siguiendo su baliza y lanza un torpedo con T. Tienes ' + pl(J.torpedos, 'torpedo', 'torpedos') + '. F te dice dónde está y C, las salidas de este tramo.' + txtGuardia);
+    else if (J.enLab)
+      decir('¡Sal del conducto! Desanda el camino hasta la entrada siguiendo la baliza de dos tonos. Detonación en ' + Math.max(0, Math.ceil(E.cuenta)) + ' segundos. ' + (E.retirada ? 'Aliados en retirada.' : 'Aún no has avisado a los aliados: pulsa R.'));
+    else if (E.fortaleza && E.escudoFort)
+      decir('La Fortaleza Lunar tiene el escudo activo y es inmune. El equipo de tierra lo está desactivando: faltan unos ' + Math.ceil(E.escudoT) + ' segundos. Mientras tanto, defiende tu crucero de los bombarderos, derriba interceptores y esquiva el rayo de la fortaleza.');
+    else if (E.fortaleza && E.cuenta < 0 && E.torpedoEnVuelo < 0)
+      decir('Objetivo: entra en el conducto, bajo la Fortaleza Lunar, y destruye el reactor que hay en el laberinto. Acércate por debajo: arriba, a la izquierda y a la derecha está el perímetro de peligro.' + txtGuardia + ' Vigila los bombarderos que atacan tu crucero.');
+    else if (E.torpedoEnVuelo >= 0)
+      decir('El torpedo va camino del reactor. Prepárate para avisar por radio con R y alejarte.');
+    else if (E.fortaleza)
+      decir('¡Aléjate! Detonación en ' + Math.max(0, Math.ceil(E.cuenta)) + ' segundos. ' + (E.retirada ? 'Aliados en retirada.' : 'Aún no has avisado a los aliados: pulsa R.'));
+    else {
+      const q = enemigos().length;
+      if (E.acorVivo) decir('Objetivo: destruye el Acorazado Tirano, a la derecha. Casco al ' + Math.round(E.acorVida / ACOR.vidaMax * 100) + ' por ciento. Mientras siga en pie seguirán saliendo interceptores y bombarderos; ahora hay ' + q + ' enemigos.');
+      else decir('Objetivo: derriba ' + (q === 1 ? 'la última nave enemiga.' : 'las ' + q + ' naves enemigas restantes.') + ' Pulsa E para localizarlas.');
+    }
+  },
+  h() { decir((E.tutorial ? 'Entrenamiento: O repite las instrucciones y N salta el paso. ' : '') + 'Flechas: mover; en el laberinto, avanzar un tramo. Mayúsculas mantenida: despacio. Espacio: láser. T: torpedo. R: radio. G: aumentar la guardia del conducto; Mayúsculas más G: reducirla. S: estado. C: posición. X: crucero Vanguardia. F: conducto, o en el laberinto, reactor y siguiente paso. E: enemigo más cercano. B: bombarderos. A: aliados. D: acorazado. O: objetivo. Escape: pausa; en pausa, M: sonidos, D: dificultad, Q: salir de la partida. Re Pág y Av Pág: volumen general. Inicio y Fin: volumen de la batalla de fondo. V: voz del navegador. Mayúsculas más V: voz de la radio. Mayúsculas más R: repetir la última radio.'); },
+};
+
+// ================== TECLADO ==================
+const juego = $('#juego');
+function pausar(p) {
+  if (E.fase !== 'juego' || E.pausa === p) return;
+  E.pausa = p; teclas.clear();
+  if (p) { callarVoces(); fijarGain(busJuego.gain, 0); fijarGain(busLab.gain, 0); E.mira.set(0); E.perim.set(0); E.zRayo.set(0); decir('Pausa. Escape: continuar. M: sonidos. D: dificultad. Q: salir de la partida.'); }
+  else { fijarGain(busJuego.gain, J.enLab ? .22 : 1); fijarGain(busLab.gain, 1); ultimo = performance.now(); decir('Continuamos.'); }
+}
+
+// ================== MENÚ DE SONIDOS ==================
+let enSonidos = false, volverA = null, Jguardado = null, indiceSon = 0, demo = [], timers = [];
+function pararDemo() { timers.forEach(clearTimeout); timers = []; demo.forEach(d => d.cancel()); demo = []; }
+function despues(ms, fn) { timers.push(setTimeout(fn, ms)); }
+// Motor que se mueve: tray(k) da la posición relativa a ti (k va de 0 a 1)
+function moverMotor(tipo, dur, tray) {
+  const m = new Motor(tipo, master), t0 = performance.now();
+  let vivo = true;
+  const c = { cancel() { if (vivo) { vivo = false; m.detener(); } } };
+  demo.push(c);
+  const paso = () => {
+    if (!vivo) return;
+    const k = (performance.now() - t0) / 1000 / dur;
+    if (k >= 1) { c.cancel(); return; }
+    const p = tray(k); m.posicionar(J.x + p.x, J.y + p.y);
+    requestAnimationFrame(paso);
+  };
+  paso();
+}
+function motorFijo(tipo, dur, vol = 1, tono = 1) {
+  const m = new Motor(tipo, master); m.fijo(vol, tono);
+  const c = { cancel() { m.detener(); } };
+  demo.push(c); despues(dur * 1000, () => c.cancel());
+}
+const aqui = (dx, dy = 0) => [J.x + dx, J.y + dy];
+// Tono de aviso que cambia con el tiempo: fn(k) da { vol, pan, tono, am } (k va de 0 a 1)
+function demoZumbido(nombre, dur, fn) {
+  const z = new Zumbido(ZUMBIDOS[nombre]), t0 = performance.now();
+  let vivo = true;
+  const c = { cancel() { if (vivo) { vivo = false; z.detener(); } } };
+  demo.push(c);
+  const paso = () => {
+    if (!vivo) return;
+    const k = (performance.now() - t0) / 1000 / dur;
+    if (k >= 1) { c.cancel(); return; }
+    const p = fn(k); z.set(p.vol, p.pan, p.tono, p.am);
+    requestAnimationFrame(paso);
+  };
+  paso();
+}
+
+// Baliza del laberinto de ejemplo: dos pitidos hacia cada paso del camino, cada vez más seguidos
+function demoBaliza(camino, salida) {
+  let t = 0;
+  camino.forEach((nom, i) => {
+    for (let k = 0; k < 2; k++) {
+      const pasos = (camino.length - i) * 2 - k;
+      despues(t, () => SFX.pingLab(nom, salida));
+      t += (.2 + pasos / 14 * 1.0) * 1000;
+    }
+  });
+}
+
+const SONIDOS = [
+  { n: 'Motor de tu nave, el Centella', d: 'Zumbido grave y suave, siempre en el centro. Primero quieta; luego sube un poco de tono porque te mueves.',
+    p() { motorFijo('jugador', 1.5, .6); despues(1600, () => motorFijo('jugador', 1.5, 1, 1.25)); } },
+  { n: 'Interceptor enemigo a tu altura', d: 'Zumbido áspero y vibrante. Este está delante, a tu derecha, y a tu misma altura, así que suena con su tono normal. Recuerda este tono: es la referencia.',
+    p() { moverMotor('enemigo', 2.5, () => ({ x: 8, y: 0 })); } },
+  { n: 'Interceptor cruzando de izquierda a derecha', d: 'Escucha cómo pasa de un oído al otro.',
+    p() { moverMotor('enemigo', 4, k => ({ x: -20 + 40 * k, y: 0 })); } },
+  { n: 'Interceptor de arriba abajo', d: 'Empieza por encima de ti y suena agudo. Baja hasta tu altura, con tono normal, y sigue bajando hasta sonar grave. Agudo es arriba, grave es abajo.',
+    p() { moverMotor('enemigo', 5, k => ({ x: 6, y: 10 - 20 * k })); } },
+  { n: 'Interceptor que se acerca', d: 'Lejos suena bajito y apagado; cerca, fuerte y nítido.',
+    p() { moverMotor('enemigo', 4, k => ({ x: 40 - 34 * k, y: 0 })); } },
+  { n: 'Bombardero enemigo Martillo', d: 'Zumbido muy grave y ondulante. Es lento y va directo a tu crucero, a la izquierda. Este viene desde la derecha.',
+    p() { moverMotor('bombardero', 5, k => ({ x: 20 - 30 * k, y: 0 })); } },
+  { n: 'Bomba', d: 'Silbido que cae: un bombardero ha soltado una bomba contra tu crucero.', p() { SFX.bomba(...aqui(6)); } },
+  { n: 'Impacto en tu crucero', d: 'Explosión metálica desde el crucero, a la izquierda del todo. Si recibe demasiadas, pierdes la partida.',
+    p() { const g = J; J = { x: 20, y: 20, dir: 1 }; SFX.impactoCrucero(); J = g; } },
+  { n: 'Cañones del crucero Vanguardia', d: 'Doble disparo seco, «pum, pum»: los cañones de tu crucero disparan a un enemigo que se acerca, sobre todo a los bombarderos. Suenan desde la izquierda del todo.',
+    p() { SFX.canonCru(...aqui(-15, 3)); despues(900, () => SFX.canonCru(...aqui(-15, -3))); } },
+  { n: 'Caza aliado Aspa', d: 'Motor grave y suave, más tranquilo que el enemigo. Este pasa de derecha a izquierda.',
+    p() { moverMotor('aliado', 4, k => ({ x: 20 - 40 * k, y: 0 })); } },
+  { n: 'Fortaleza Lunar', d: 'Retumbar muy grave y continuo. Está en el centro del campo. Aquí te vas acercando a ella desde la izquierda.',
+    p() { moverMotor('fortaleza', 5, k => ({ x: 30 - 26 * k, y: 0 })); } },
+  { n: 'Crucero Vanguardia, tu base', d: 'Acorde grave y tranquilo. Está a la izquierda del todo, donde está el hangar.',
+    p() { moverMotor('crucero', 4, () => ({ x: -10, y: 0 })); } },
+  { n: 'Acorazado Tirano, la base enemiga', d: 'Rugido grave y desafinado. Está a la derecha del todo y de él salen los interceptores.',
+    p() { moverMotor('acorazado', 4, () => ({ x: 12, y: 0 })); } },
+  { n: 'Escudo de la fortaleza desactivado', d: 'Mensaje de radio y un zumbido que se apaga desde la fortaleza: el equipo de tierra ha desactivado el escudo y el conducto está abierto.',
+    p() { SFX.radio(); despues(500, () => { const g = J; J = { x: 35, y: 20, dir: 1 }; SFX.escudoCae(); J = g; }); } },
+  { n: 'Rayo de la fortaleza cargando y disparando', d: 'Zumbido grave que sube de tono y vibra cada vez más rápido mientras carga; luego, el disparo. Aquí carga a tu izquierda, lejos de ti.',
+    p() { demoZumbido('rayo', 4, k => ({ vol: .5, pan: -.6, tono: 1 + k * 3, am: 3 + k * 14 })); despues(4000, () => SFX.disparoRayo(...aqui(-15))); } },
+  { n: 'Estás en la línea del rayo', d: 'Pitidos agudos muy rápidos sobre el zumbido de carga: el rayo te alcanzará. ¡Sal de su línea! Aquí sales a tiempo y suena el tono suave de «a salvo».',
+    p() { demoZumbido('rayo', 3, k => ({ vol: k < .75 ? 1 : .5, pan: 0, tono: 1 + k * 2.2, am: 3 + k * 10 }));
+          for (let i = 0; i < 14; i++) despues(i * 160, () => SFX.peligroRayo()); despues(2300, () => SFX.aSalvo()); } },
+  { n: 'Baliza del conducto', d: 'Pitido que marca la entrada del conducto, bajo la fortaleza; suena cuando cae el escudo. Cuanto más cerca, más rápido. Aquí el conducto está un poco por debajo de ti, por eso suena algo grave.',
+    p() { let t = 0; for (let i = 0; i < 14; i++) { const dx = 30 - 28 * i / 13; despues(t, () => { const [x, y] = aqui(dx, -3); sonido({ x, y, tipo: 'sine', f0: 1500, dur: .07, vol: .4, rango: 110 }); }); t += (.12 + dx / 60 * 1.1) * 1000; } } },
+  { n: 'Entrar en el conducto', d: 'Una compuerta metálica se cierra detrás de ti y su eco se pierde por el túnel: has entrado en el laberinto. A partir de aquí, la batalla de fuera se oye apagada.',
+    p() { SFX.entrarLab(); } },
+  { n: 'Ambiente dentro del conducto', d: 'Aire de ventilación que va y viene y un zumbido metálico grave. Mientras lo oigas, estás dentro del laberinto.',
+    p() { const a = new AmbienteLab(master); const c = { cancel() { a.detener(); } }; demo.push(c); despues(4000, () => c.cancel()); } },
+  { n: 'Avanzar un tramo y sus salidas', d: 'Un soplido con eco metálico al avanzar y después las salidas del tramo nuevo. Aquí hay una salida a la izquierda y otra arriba.',
+    p() { SFX.paso(); SFX.salidas(['izquierda', 'arriba'], .2); } },
+  { n: 'Las cuatro salidas', d: 'Así suena cada salida, en este orden: izquierda, en tu oído izquierdo; arriba, agudo; derecha, en tu oído derecho; y abajo, grave.',
+    p() { SFX.salidas(['izquierda', 'arriba', 'derecha', 'abajo']); } },
+  { n: 'Pared', d: 'Golpe sordo: por ahí no se puede pasar. Suena del lado donde está la pared; aquí, a la derecha.',
+    p() { SFX.pared('derecha'); } },
+  { n: 'Baliza del reactor', d: 'Pitido que te guía paso a paso: suena hacia donde tienes que ir ahora. En el oído izquierdo o derecho, ve hacia ese lado; agudo, sube; grave, baja. Se acelera cuanto menos camino te queda. Aquí el camino es: arriba, derecha, arriba, izquierda y arriba.',
+    p() { demoBaliza(['arriba', 'derecha', 'arriba', 'izquierda', 'arriba'], false); } },
+  { n: 'Sobre el reactor', d: 'Zumbido agudo y ondulante: estás encima del reactor. Pulsa T para lanzar el torpedo.',
+    p() { motorFijo('conducto', 2.5); } },
+  { n: 'Baliza de salida', d: 'Dos tonos que te guían igual, paso a paso, hasta la salida del laberinto. Suena después de lanzar el torpedo. Aquí el camino es: abajo, izquierda, abajo, derecha y abajo.',
+    p() { demoBaliza(['abajo', 'izquierda', 'abajo', 'derecha', 'abajo'], true); } },
+  { n: 'Un interceptor entra en el conducto', d: 'Tres pitidos que bajan: un interceptor se ha colado en el laberinto detrás de ti. Pon guardia en la entrada con G para evitarlo.',
+    p() { SFX.intruso(); } },
+  { n: 'Salir del conducto', d: 'La compuerta se abre y un soplido sube: has vuelto al exterior, debajo de la fortaleza.',
+    p() { SFX.salirLab(); } },
+  { n: 'Cerca del perímetro peligroso', d: 'Zumbido eléctrico. Suena desde el lado donde está el peligro y se vuelve más fuerte y agudo cuanto más te acercas. Aquí el perímetro está a tu derecha y te acercas hasta tocarlo; al final suena la alarma de estar dentro.',
+    p() { demoZumbido('perimetro', 4, k => ({ vol: Math.pow(k, 1.3) * .8 + .05, pan: .8 - k * .7, tono: 1 + k * .5 })); despues(3700, () => SFX.alarma()); } },
+  { n: 'Dentro del perímetro', d: 'Alarma de dos tonos. Estás perdiendo escudos: sal cuanto antes.',
+    p() { for (let i = 0; i < 6; i++) despues(i * 300, () => SFX.alarma()); } },
+  { n: 'Enemigo en la mira', d: 'Pitido de radar continuo y vibrante. Suena mientras tengas un enemigo delante y a tu altura: dispara. Cuanto más cerca está, más rápido vibra. Aquí el enemigo se va acercando.',
+    p() { demoZumbido('mira', 3, k => ({ vol: 1, pan: .35, tono: 1, am: 8 + k * 10 })); } },
+  { n: 'Acorazado en la mira', d: 'El mismo pitido de radar, pero más grave y lento: estás apuntando al acorazado.',
+    p() { demoZumbido('mira', 2.5, () => ({ vol: .9, pan: .35, tono: .667, am: 5 })); } },
+  { n: 'Un enemigo te apunta', d: 'Tres pitidos rápidos que suben. Justo después dispara: muévete arriba o abajo para esquivar. Aquí lo oyes apuntar y disparar desde la derecha. No lo confundas con tu torpedo: el torpedo solo sale cuando pulsas T.',
+    p() { SFX.carga(...aqui(10)); despues(700, () => SFX.laserEnemigo(...aqui(10))); } },
+  { n: 'Disparo enemigo', d: 'Láser áspero que cae de tono.', p() { SFX.laserEnemigo(...aqui(10)); } },
+  { n: 'Disparo aliado', d: 'Láser más suave y corto.', p() { SFX.laserAliado(...aqui(-8)); } },
+  { n: 'Tu láser', d: 'Disparo agudo y rápido, en el centro. Mantén Espacio para disparar seguido.',
+    p() { for (let i = 0; i < 4; i++) despues(i * 220, () => SFX.laserJugador()); } },
+  { n: 'Disparo que te pasa rozando', d: 'Un silbido: un disparo enemigo te pasó muy cerca sin darte.', p() { SFX.casi(...aqui(0, 1.5)); } },
+  { n: 'Impacto en un interceptor', d: 'Chasquido seco: le has dado. Cada interceptor aguanta 3 impactos.',
+    p() { for (let i = 0; i < 3; i++) despues(i * 350, () => SFX.impacto(...aqui(8))); } },
+  { n: 'Interceptor derribado', d: 'Explosión seguida de un tono que sube: lo derribaste tú.',
+    p() { SFX.explosion(...aqui(8), .6); SFX.confirmar(); } },
+  { n: 'Te han dado', d: 'Golpe fuerte y ruidoso en el centro: has perdido escudos.', p() { SFX.danoJugador(); } },
+  { n: 'Aliado caído', d: 'Explosión y un tono triste que baja: han derribado a un aliado.',
+    p() { SFX.explosion(...aqui(-8), .6); SFX.aliadoCaido(...aqui(-8)); } },
+  { n: 'Cañón del acorazado', d: 'Zumbido grave que sube mientras carga y después un cañonazo. Pasa cuando te acercas al acorazado. Esquiva moviéndote.',
+    p() { SFX.cargaTorreta(...aqui(15)); despues(700, () => SFX.canon(...aqui(15))); } },
+  { n: 'Escudo del acorazado', d: 'Brillo metálico agudo: tu disparo rebotó en sus escudos. Mientras exista la fortaleza, el acorazado es invulnerable.',
+    p() { SFX.deflector(...aqui(12)); } },
+  { n: 'Blindaje de la fortaleza', d: 'Golpe metálico seco: tu disparo dio en la fortaleza y no le hizo nada.', p() { SFX.blindaje(...aqui(6)); } },
+  { n: 'Choque', d: 'Golpe sordo: has chocado contra el borde del campo, la fortaleza o el acorazado.', p() { SFX.bump(); } },
+  { n: 'Cambio de dirección', d: 'Clic suave en el lado hacia el que ahora apuntas. Primero a la derecha, luego a la izquierda.',
+    p() { SFX.giro(1); despues(600, () => SFX.giro(-1)); } },
+  { n: 'Tu torpedo', d: 'Golpe grave de lanzamiento y un siseo que se aleja. Solo suena cuando pulsas T.', p() { SFX.torpedo(); } },
+  { n: 'Torpedo recargado', d: 'Tono que sube, en el hangar.', p() { SFX.recarga(); } },
+  { n: 'Radio', d: 'Estática y dos pitidos: has hablado con tus aliados.', p() { SFX.radio(); } },
+  { n: 'Cuenta atrás', d: 'Sirena desde la fortaleza y un pitido cada segundo. Los últimos 5 son más agudos. ¡Huye!',
+    p() { for (let i = 0; i < 7; i++) despues(i * 1000, () => { SFX.pitido(i >= 2); SFX.sirena(); }); } },
+  { n: 'Explosión de la fortaleza', d: 'Explosión enorme y larga.', p() { SFX.granExplosion(...aqui(5)); } },
+  { n: 'Comienzo y reaparición', d: 'Tres notas que suben.', p() { SFX.inicio(); } },
+  { n: 'Victoria', d: 'Melodía de triunfo.', p() { SFX.victoria(); } },
+  { n: 'Derrota', d: 'Melodía que baja.', p() { SFX.derrota(); } },
+];
+
+function anunciarSon() {
+  pararDemo();
+  const s = SONIDOS[indiceSon];
+  decir((indiceSon + 1) + ' de ' + SONIDOS.length + ': ' + s.n + '. ' + s.d);
+}
+function abrirSonidos(origen) {
+  iniciarAudio(); pararDemo();
+  enSonidos = true; volverA = origen; Jguardado = J; J = { x: 50, y: 20, dir: 1 };
+  teclas.clear(); fijarGain(busJuego.gain, 0); fijarGain(filtroExt.frequency, 20000);
+  decir('Menú de sonidos. Flechas arriba y abajo para elegir, Enter para escuchar, Escape para salir. ' +
+        (indiceSon + 1) + ' de ' + SONIDOS.length + ': ' + SONIDOS[indiceSon].n + '. ' + SONIDOS[indiceSon].d);
+}
+function cerrarSonidos(silencioso = false) {
+  if (!enSonidos) return;
+  pararDemo(); enSonidos = false; J = Jguardado;
+  if (J.enLab) fijarGain(filtroExt.frequency, 380);
+  if (silencioso) return;
+  if (volverA === 'pagina') { decir('Has salido del menú de sonidos.'); $('#abrir-sonidos').focus(); }
+  else if (volverA === 'pausa') decir('De vuelta a la pausa. Pulsa Escape para continuar, o M para volver a los sonidos.');
+  else decir('Pulsa Enter para jugar de nuevo, o M para volver a los sonidos.');
+}
+function teclaSonidos(e) {
+  const k = e.key;
+  if (['ArrowUp', 'ArrowDown', 'Home', 'End', ' '].includes(k)) e.preventDefault();
+  if (k === 'ArrowDown') { indiceSon = (indiceSon + 1) % SONIDOS.length; anunciarSon(); }
+  else if (k === 'ArrowUp') { indiceSon = (indiceSon - 1 + SONIDOS.length) % SONIDOS.length; anunciarSon(); }
+  else if (k === 'Home') { indiceSon = 0; anunciarSon(); }
+  else if (k === 'End') { indiceSon = SONIDOS.length - 1; anunciarSon(); }
+  else if ((k === 'Enter' || k === ' ') && !e.repeat) { pararDemo(); SONIDOS[indiceSon].p(); }
+  else if (k === 'Escape') cerrarSonidos();
+}
+
+juego.addEventListener('keydown', e => {
+  const k = e.key;
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'PageUp', 'PageDown'].includes(k)) e.preventDefault();
+  const kl = k.length === 1 ? k.toLowerCase() : k;
+  if (kl === 'PageUp' || kl === 'PageDown') {
+    volumen = limitar(volumen + (kl === 'PageUp' ? .1 : -.1), 0, 1.5);
+    if (master) master.gain.value = volumen;
+    decir('Volumen ' + Math.round(volumen * 100) + ' por ciento');
+    return;
+  }
+  if (kl === 'v' && e.shiftKey) {
+    if (!vozRadio()) { decir('No hay ninguna voz de radio elegida. Elígela en la página, en el apartado Voz de la radio.'); return; }
+    radioActiva = !radioActiva;
+    if (radioActiva) radio('Voz de la radio activada.', true);
+    else decir('Voz de la radio desactivada. Los mensajes de radio los leerá tu lector de pantalla.');
+    return;
+  }
+  if (kl === 'v') {
+    sintesis = !sintesis;
+    decir(sintesis ? 'Voz del navegador activada.' : 'Voz del navegador desactivada. Se usará tu lector de pantalla.');
+    return;
+  }
+  if (enSonidos) { teclaSonidos(e); return; }
+  if (E.fase === 'fin' || E.fase === 'menu') {
+    const inf = E.informe || [], n = inf.length;
+    const leer = () => decir((E.iInforme + 1) + ' de ' + n + '. ' + inf[E.iInforme]);
+    if (k === 'Enter') iniciarPartida();
+    else if (kl === 'e') iniciarPartida('entrenamiento');
+    else if (kl === 'd') cambiarDificultad();
+    else if (kl === 'c' && n) copiarInforme();
+    else if (kl === 'h') decir('Enter: batalla. E: entrenamiento. D: dificultad. M: sonidos.' + (n ? ' Flechas arriba y abajo: informe de misión. I: informe entero. C: copiar el informe.' : ''));
+    else if (kl === 'm') abrirSonidos('fin');
+    else if (kl === 'i' && n) decir('Informe de misión. ' + inf.join(' '));
+    else if (n && kl === 'ArrowDown') { E.iInforme = Math.min(n - 1, E.iInforme + 1); leer(); }
+    else if (n && kl === 'ArrowUp') { E.iInforme = Math.max(0, E.iInforme - 1); leer(); }
+    else if (n && kl === 'Home') { e.preventDefault(); E.iInforme = 0; leer(); }
+    else if (n && kl === 'End') { e.preventDefault(); E.iInforme = n - 1; leer(); }
+    return;
+  }
+  if (E.fase !== 'juego') return;
+  if (kl === 'Home' || kl === 'End') {
+    e.preventDefault();
+    volAmb = limitar(volAmb + (kl === 'Home' ? .1 : -.1), 0, 1.5);
+    busAmb.gain.cancelScheduledValues(ctx.currentTime); busAmb.gain.value = volAmb;
+    decir('Volumen de la batalla ' + Math.round(volAmb * 100) + ' por ciento');
+    return;
+  }
+  if (kl === 'Escape' || kl === 'p') { pausar(!E.pausa); return; }
+  if (E.pausa) {
+    if (kl === 'h') INFO.h();
+    else if (kl === 'm') abrirSonidos('pausa');
+    else if (kl === 'd') cambiarDificultad();
+    else if (kl === 'q') abandonarPartida();
+    return;
+  }
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Shift'].includes(kl)) {
+    teclas.add(kl);
+    // en el laberinto, cada pulsación avanza un tramo enseguida
+    if (J.enLab && FLECHA_DIR[kl]) { if (!e.repeat) { J.flecha = kl; moverLab(FLECHA_DIR[kl]); } return; }
+    if (!e.repeat && (kl === 'ArrowLeft' || kl === 'ArrowRight')) {
+      const d = kl === 'ArrowLeft' ? -1 : 1;
+      if (d !== J.dir) { J.dir = d; SFX.giro(d); }
+    }
+    return;
+  }
+  if (e.repeat) return;
+  if (kl === 't') lanzarTorpedo();
+  else if (kl === 'r' && e.shiftKey) { if (ultimaRadio) radio(ultimaRadio, true, false); else decir('Todavía no ha habido mensajes de radio.'); }
+  else if (kl === 'r') usarRadio();
+  else if (kl === 'g') ordenarGuardia(e.shiftKey ? -1 : 1);
+  else if (kl === 'n' && E.tutorial) saltarPaso();
+  else if (INFO[kl]) INFO[kl]();
+});
+juego.addEventListener('keyup', e => { teclas.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key); });
+juego.addEventListener('blur', e => {
+  // tocar los controles táctiles no cuenta como salir del juego
+  if (tocandoPanel(e.relatedTarget)) return;
+  teclas.clear();
+  cerrarSonidos(true);
+  if (E.fase === 'juego' && !E.pausa) pausar(true);
+});
+
+$('#comenzar').addEventListener('click', () => {
+  juego.focus();
+  iniciarPartida();
+});
+$('#entrenar').addEventListener('click', () => {
+  juego.focus();
+  iniciarPartida('entrenamiento');
+});
+$('#copiar-informe').addEventListener('click', copiarInforme);
+// Voz de la radio: lista de voces, preferencias guardadas y botón de prueba
+cargarVoces();
+if (hayVoz) speechSynthesis.addEventListener('voiceschanged', cargarVoces);
+$('#voz-radio').addEventListener('change', () => { try { localStorage.setItem('orvan-voz-radio', $('#voz-radio').value); } catch (e) {} });
+try { const vg = localStorage.getItem('orvan-vel-radio'); if (vg && VELOCIDAD_RADIO[vg]) $('#vel-radio').value = vg; } catch (e) {}
+try { const vl = localStorage.getItem('orvan-vel-lector'); if (vl && VEL_LECTOR[vl]) $('#vel-lector').value = vl; } catch (e) {}
+$('#vel-lector').addEventListener('change', () => { try { localStorage.setItem('orvan-vel-lector', $('#vel-lector').value); } catch (e) {} });
+$('#vel-radio').addEventListener('change', () => { try { localStorage.setItem('orvan-vel-radio', $('#vel-radio').value); } catch (e) {} });
+$('#probar-radio').addEventListener('click', () => {
+  iniciarAudio();
+  if (!hayVoz || !vocesEs().length) { decir('Tu navegador no tiene voces en español. La radio la leerá tu lector de pantalla.'); return; }
+  if (!vozRadio()) { decir('No has elegido voz: la radio la leerá tu lector de pantalla.'); return; }
+  SFX.radio(); hablarRadio('Aquí Aspa líder. Te recibimos alto y claro, Centella.', true);
+});
+// Modo para computadoras lentas
+try { modoLigero = localStorage.getItem('orvan-ligero') === '1'; } catch (e) {}
+$('#ligero').checked = modoLigero;
+$('#ligero').addEventListener('change', () => { modoLigero = $('#ligero').checked; try { localStorage.setItem('orvan-ligero', modoLigero ? '1' : '0'); } catch (e) {} });
+const selDif = $('#dificultad');
+try { const g = localStorage.getItem('orvan-dificultad'); if (g && DIF[g]) selDif.value = g; } catch (e) {}
+selDif.addEventListener('change', () => { try { localStorage.setItem('orvan-dificultad', selDif.value); } catch (e) {} });
+$('#abrir-sonidos').addEventListener('click', () => {
+  juego.focus();
+  // si hay una partida en pausa, al salir del menú se vuelve a ella
+  abrirSonidos(E.fase === 'juego' ? 'pausa' : E.fase === 'fin' ? 'fin' : 'pagina');
+});
+
+// ================== CONTROLES TÁCTILES ==================
+// Cada botón manda al juego la misma tecla que el teclado.
+// Tipos: 'd' dirección (se queda pulsada; en el laberinto, un tramo por toque),
+//        'm' se queda pulsada hasta volver a tocarla, sin tipo: una pulsación.
+const tactil = $('#tactil'), cajaTactil = $('#botones-tactil');
+const OPUESTA = { ArrowUp: 'ArrowDown', ArrowDown: 'ArrowUp', ArrowLeft: 'ArrowRight', ArrowRight: 'ArrowLeft' };
+const SOSTENIDAS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Shift'];
+const GRUPOS_TACTIL = {
+  juego: { titulo: 'Combate', foco: 4, botones: [
+    ['Despacio, Mayúsculas', 'Shift', 'm'], ['Arriba', 'ArrowUp', 'd'], ['Disparar, Espacio', ' ', 'm'],
+    ['Izquierda', 'ArrowLeft', 'd'], ['Parar', 'parar'], ['Derecha', 'ArrowRight', 'd'],
+    ['Torpedo, T', 't'], ['Abajo', 'ArrowDown', 'd'], ['Radio, R', 'r'],
+    ['Más guardia, G', 'g'], ['Menos guardia, Mayúsculas G', 'g', null, true], ['Objetivo, O', 'o'],
+    ['Estado, S', 's'], ['Posición, C', 'c'], ['Crucero, X', 'x'],
+    ['Conducto o reactor, F', 'f'], ['Enemigo cercano, E', 'e'], ['Bombarderos, B', 'b'],
+    ['Aliados, A', 'a'], ['Acorazado, D', 'd'], ['Repetir radio, Mayúsculas R', 'r', null, true],
+    ['Ayuda de teclas, H', 'h'], ['Saltar paso, N', 'n', null, false, () => E.tutorial], ['Pausa, Escape', 'Escape'] ] },
+  pausa: { titulo: 'Pausa', foco: 0, botones: [
+    ['Continuar', 'Escape'], ['Salir de la partida, Q', 'q'], ['Dificultad, D', 'd'],
+    ['Sonidos, M', 'm'], ['Ayuda de teclas, H', 'h'], ['Voz del navegador, V', 'v'],
+    ['Subir volumen general', 'PageUp'], ['Bajar volumen general', 'PageDown'], ['Voz de la radio, Mayúsculas V', 'v', null, true] ] },
+  menu: { titulo: 'Menú', foco: 0, botones: [
+    ['Batalla, Enter', 'Enter'], ['Entrenamiento, E', 'e'], ['Dificultad, D', 'd'],
+    ['Sonidos, M', 'm'], ['Ayuda, H', 'h'], ['Informe entero, I', 'i'],
+    ['Informe: anterior', 'ArrowUp'], ['Informe: siguiente', 'ArrowDown'], ['Copiar informe, C', 'c'] ] },
+  sonidos: { titulo: 'Menú de sonidos', foco: 1, botones: [
+    ['Sonido anterior', 'ArrowUp'], ['Escuchar', 'Enter'], ['Sonido siguiente', 'ArrowDown'],
+    ['Primer sonido', 'Home'], ['Salir de los sonidos', 'Escape'], ['Último sonido', 'End'] ] },
+};
+let ultimoToquePanel = 0;
+const enPanel = el => !!el && tactil.contains(el);
+// el foco se va a un botón del panel, o el toque es tan reciente que el navegador aún no lo ha movido (Safari)
+function tocandoPanel(destino) { return enPanel(destino) || performance.now() - ultimoToquePanel < 800; }
+const marcarToque = () => { ultimoToquePanel = performance.now(); };
+tactil.addEventListener('pointerdown', marcarToque, true);
+tactil.addEventListener('touchstart', marcarToque, { capture: true, passive: true });
+tactil.addEventListener('mousedown', marcarToque, true);
+
+function mandarTecla(tipo, key, shift = false) {
+  juego.dispatchEvent(new KeyboardEvent(tipo, { key, shiftKey: shift, bubbles: true, cancelable: true }));
+}
+function soltarSostenidas() { SOSTENIDAS.forEach(k => { if (teclas.has(k)) mandarTecla('keyup', k); }); }
+function tocarBoton(b) {
+  marcarToque();
+  const [, key, tipo, shift] = b.def;
+  const jugando = E.fase === 'juego' && !E.pausa && !enSonidos;
+  if (key === 'parar') { soltarSostenidas(); decir('Parado.'); }
+  else if (tipo && jugando && !(tipo === 'd' && J.enLab)) {
+    if (teclas.has(key)) mandarTecla('keyup', key);
+    else { if (OPUESTA[key] && teclas.has(OPUESTA[key])) mandarTecla('keyup', OPUESTA[key]); mandarTecla('keydown', key); }
+  } else { mandarTecla('keydown', key, shift); mandarTecla('keyup', key, shift); }
+  sincronizarTactil();
+}
+const divGrupos = {};
+for (const [id, g] of Object.entries(GRUPOS_TACTIL)) {
+  const div = document.createElement('div');
+  div.className = 'grupo-tactil'; div.hidden = true;
+  div.setAttribute('role', 'group'); div.setAttribute('aria-label', g.titulo);
+  g.els = g.botones.map(def => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = def[0]; b.def = def;
+    if (def[2]) b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', () => tocarBoton(b));
+    div.appendChild(b);
+    return b;
+  });
+  divGrupos[id] = div; cajaTactil.appendChild(div);
+}
+let grupoTactil = null;
+function sincronizarTactil() {
+  if (tactil.hidden) return;
+  const id = enSonidos ? 'sonidos' : E.fase === 'juego' ? (E.pausa ? 'pausa' : 'juego') : 'menu';
+  if (id !== grupoTactil) {
+    const a = document.activeElement;
+    const teniaFoco = enPanel(a) || ((!a || a === document.body) && performance.now() - ultimoToquePanel < 1500);
+    for (const [k, div] of Object.entries(divGrupos)) div.hidden = k !== id;
+    const habia = grupoTactil !== null;
+    grupoTactil = id;
+    // si el botón tocado ha desaparecido, el foco pasa al botón principal del grupo nuevo
+    if (habia && teniaFoco) { const g = GRUPOS_TACTIL[id]; g.els[g.foco].focus({ preventScroll: true }); }
+  }
+  const jugando = id === 'juego';
+  for (const b of GRUPOS_TACTIL[id].els) {
+    const [, key, tipo, , si] = b.def;
+    if (si) { const ver = !!si(); if (b.hidden === ver) b.hidden = !ver; }
+    if (tipo) {
+      const p = String(jugando && !(tipo === 'd' && J.enLab) && teclas.has(key));
+      if (b.getAttribute('aria-pressed') !== p) b.setAttribute('aria-pressed', p);
+    }
+  }
+}
+setInterval(sincronizarTactil, 150);
+function mostrarTactil(ver) {
+  tactil.hidden = !ver; $('#ver-tactil').checked = ver; grupoTactil = null;
+  sincronizarTactil();
+}
+{
+  let ver = null;
+  try { const g = localStorage.getItem('orvan-tactil'); if (g) ver = g === '1'; } catch (e) {}
+  if (ver === null) ver = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+  mostrarTactil(ver);
+}
+$('#ver-tactil').addEventListener('change', () => {
+  const ver = $('#ver-tactil').checked;
+  mostrarTactil(ver);
+  try { localStorage.setItem('orvan-tactil', ver ? '1' : '0'); } catch (e) {}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de Batalla de Orvan</title>
+<style>
+  :root { --fondo:#05060a; --texto:#e8eaf0; --acento:#ffd23f; --enlace:#8ecbff; }
+  body { background:var(--fondo); color:var(--texto); font-family:system-ui, sans-serif; line-height:1.55; max-width:50em; margin:1em auto; padding:0 16px; }
+  h1, h2, h3 { color:var(--acento); }
+  a { color:var(--enlace); }
+  table { border-collapse:collapse; width:100%; }
+  th, td { border:1px solid #444; padding:.4em .6em; text-align:left; }
+  th { color:var(--acento); }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="index.html">Volver al juego</a></p>
+  <h1>Manual de Batalla de Orvan</h1>
+  <p>Aquí está todo lo que necesitas saber para jugar. Si usas lector de pantalla, puedes saltar de sección en sección con la tecla H (encabezados).</p>
+
+  <h2>Índice</h2>
+  <ul>
+    <li><a href="#mision">La historia y tu misión</a></li>
+    <li><a href="#empezar">Cómo empezar</a></li>
+    <li><a href="#fases">La batalla, fase a fase</a></li>
+    <li><a href="#naves">Las naves</a></li>
+    <li><a href="#fortaleza">La Fortaleza Lunar</a></li>
+    <li><a href="#laberinto">El laberinto del conducto</a></li>
+    <li><a href="#guardia">La guardia y la radio</a></li>
+    <li><a href="#controles">Controles</a></li>
+    <li><a href="#celular">Jugar en el celular</a></li>
+    <li><a href="#sonidos">Cómo suena</a></li>
+    <li><a href="#entrenamiento">El entrenamiento</a></li>
+    <li><a href="#puntuacion">Puntuación e informe</a></li>
+    <li><a href="#opciones">Opciones y dificultad</a></li>
+    <li><a href="#consejos">Consejos</a></li>
+  </ul>
+
+  <h2 id="mision">La historia y tu misión</h2>
+  <p>Eres piloto de la Coalición Libre y vuelas el Centella, una nave prototipo y la única de tu bando que lleva torpedos. Tu crucero, el Vanguardia, está a la izquierda del campo de batalla. A la derecha está el Acorazado Tirano del Dominio Estelar, que lanza interceptores y bombarderos. En el centro flota la Fortaleza Lunar.</p>
+  <p>Tu misión: destruir la Fortaleza Lunar, después acabar con el Acorazado Tirano y derribar a las naves que queden, sin dejar que hundan tu crucero. Tienes 3 vidas.</p>
+
+  <h2 id="empezar">Cómo empezar</h2>
+  <ul>
+    <li>Juega con auriculares: lo que está a tu izquierda o derecha suena en ese oído.</li>
+    <li>Si es tu primera vez, pulsa el botón Entrenamiento. Son 7 pasos cortos y en ellos no pierdes vidas.</li>
+    <li>Pasa por el menú de sonidos para conocer cada aviso: flechas arriba y abajo para recorrerlo, Enter para escuchar y Escape para salir.</li>
+    <li>Con NVDA, al pulsar Entrenamiento o Comenzar batalla, el juego pasa a modo foco solo. Si las teclas no responden, pulsa NVDA más Espacio.</li>
+  </ul>
+
+  <h2 id="fases">La batalla, fase a fase</h2>
+  <h3>1. Aguantar mientras cae el escudo</h3>
+  <p>Al principio la Fortaleza Lunar tiene el escudo activo: es inmune y su perímetro de energía la rodea por los cuatro lados. Un equipo de tierra lo está desactivando y te avisa por radio de cómo va. Mientras tanto, defiende tu crucero de los bombarderos, derriba interceptores y esquiva el rayo de la fortaleza.</p>
+  <h3>2. Entrar en el conducto</h3>
+  <p>Cuando cae el escudo, el perímetro de abajo se apaga y se abre el conducto, justo debajo del centro de la fortaleza. Antes de entrar, pon guardia en la entrada con la G. Al entrar, el mapa cambia a un laberinto: recórrelo hasta el reactor y pulsa T.</p>
+  <h3>3. La huida</h3>
+  <p>Cuando el torpedo da en el reactor empieza la cuenta atrás: 15 segundos más el tiempo que se tarda en salir del laberinto. Pulsa R para avisar a tus aliados, desanda el camino hasta la salida y aléjate más de 20 unidades de la fortaleza. Todo lo que esté más cerca cuando estalle será destruido, tú también.</p>
+  <h3>4. El Acorazado Tirano</h3>
+  <p>Al caer la fortaleza, el acorazado pierde sus escudos. Se le daña con el láser y, sobre todo, con torpedos; tus aliados también lo atacan. Cuidado con sus cañones si te acercas. Destrúyelo para que dejen de salir naves enemigas, derriba las que queden y habrás ganado.</p>
+  <p>Si el crucero Vanguardia cae o pierdes las 3 vidas, pierdes la partida.</p>
+
+  <h2 id="naves">Las naves</h2>
+  <ul>
+    <li><strong>Centella</strong>, tu nave: escudos del 0 al 100 % y hasta 4 torpedos. Los escudos se reparan y los torpedos se recargan solo en el hangar del crucero, a la izquierda del todo (uno cada 4 segundos).</li>
+    <li><strong>Cazas Aspa</strong>, tus aliados: aguantan 4 disparos. El crucero lanza cazas sin parar durante toda la batalla. Cuando están muy dañados, vuelven al hangar a repararse.</li>
+    <li><strong>Interceptores</strong> enemigos: aguantan 3 disparos de láser o un torpedo. Combaten contra ti y tus aliados, y pueden colarse en el conducto detrás de ti.</li>
+    <li><strong>Bombarderos Martillo</strong>: lentos y resistentes, aguantan 10 disparos de láser o un solo torpedo. Van directos a tu crucero y sus bombas atraviesan su escudo. Un solo bombardero puede hundirlo en algo más de un minuto si nadie lo para.</li>
+    <li><strong>Crucero Vanguardia</strong>, tu base: su escudo para los láseres, pero no las bombas. Tiene dos cañones de defensa que disparan a los enemigos que se acercan, sobre todo a los bombarderos, pero son lentos y no bastan solos.</li>
+    <li><strong>Acorazado Tirano</strong>, la base enemiga: lanza interceptores y bombarderos mientras siga en pie, y sus cañones disparan a quien se acerque. Es inmune mientras exista la Fortaleza Lunar.</li>
+  </ul>
+  <p>Nadie es inmune a los peligros: el perímetro de la fortaleza, su rayo y los cañones del acorazado dañan también a las demás naves.</p>
+
+  <h2 id="fortaleza">La Fortaleza Lunar</h2>
+  <ul>
+    <li>Es un cuadrado de 4 por 4 en el centro del campo.</li>
+    <li><strong>El perímetro</strong>: una franja de energía que te quema los escudos. Rodea la fortaleza por arriba, por la izquierda y por la derecha; mientras el escudo está activo, también por debajo.</li>
+    <li><strong>El rayo letal</strong>: cada cierto tiempo la fortaleza carga un rayo hacia un lado (izquierda, derecha, arriba o abajo), uno cada vez. Tarda unos segundos en cargar, pero lo que toca queda fulminado: si te alcanza, pierdes una vida. Si estás a la izquierda o a la derecha de la fortaleza, sal de la línea subiendo o bajando; si estás encima o debajo, moviéndote a un lado. Cuando el reactor está herido, deja de disparar.</li>
+    <li><strong>El conducto</strong>: justo debajo del centro, en 50, 16. Solo se abre cuando cae el escudo.</li>
+  </ul>
+
+  <h2 id="laberinto">El laberinto del conducto</h2>
+  <ul>
+    <li>Es pequeño y distinto en cada partida: 4 por 4 tramos en Fácil, 5 por 5 en Normal y 6 por 6 en Difícil. Entras abajo en el centro.</li>
+    <li>Cada flecha avanza un tramo y también cambia hacia dónde apuntas. Mantenla pulsada para seguir avanzando.</li>
+    <li>Tras cada paso suenan las salidas del tramo. Si hay pared, oirás un golpe sordo.</li>
+    <li>La baliza te guía paso a paso: suena hacia donde tienes que ir. Pita más rápido cuanto menos camino te queda. Después del torpedo, una baliza de dos tonos te lleva igual hasta la salida.</li>
+    <li>C te dice tu posición y las salidas; F, dónde está el reactor o la salida, cuántos tramos faltan y el siguiente paso.</li>
+    <li>Si un interceptor se cuela, te perseguirá y te disparará si te ve en línea recta. Dispárale con el láser hacia donde apuntas; si te bloquea el paso, no podrás pasar hasta derribarlo.</li>
+    <li>Dentro, la batalla de fuera se oye apagada. Lo que suena fuerte y nítido está contigo en el conducto.</li>
+  </ul>
+
+  <h2 id="guardia">La guardia y la radio</h2>
+  <ul>
+    <li>Con la G mandas a una parte de tus cazas a custodiar la entrada del conducto: un cuarto, la mitad o tres cuartos. Mayúsculas más G reduce la guardia. Si derriban a un guardia, el crucero envía un relevo.</li>
+    <li>Los cazas que custodian la entrada no defienden tu crucero de los bombarderos: elige bien cuánta guardia poner.</li>
+    <li>Tus aliados te informan por radio: si hay demasiados interceptores en la entrada, si están machacando al crucero, o si todo está tranquilo y sobran cazas.</li>
+    <li>R pide a tus aliados que te escolten durante 15 segundos. Durante la cuenta atrás, R ordena la retirada para que no los alcance la explosión.</li>
+    <li>Mayúsculas más R repite el último mensaje de radio.</li>
+  </ul>
+
+  <h2 id="controles">Controles</h2>
+  <h3>En la batalla</h3>
+  <ul>
+    <li>Flechas: mover la nave. Izquierda y derecha también cambian hacia dónde apuntas.</li>
+    <li>Mayúsculas mantenida: moverte despacio, para apuntar con precisión.</li>
+    <li>Espacio: disparar el láser (mantén pulsado para disparo continuo).</li>
+    <li>T: lanzar torpedo.</li>
+    <li>R: radio (escolta o retirada). Mayúsculas más R: repetir la última radio.</li>
+    <li>G: aumentar la guardia del conducto. Mayúsculas más G: reducirla.</li>
+  </ul>
+  <h3>Información</h3>
+  <ul>
+    <li>S: estado (escudos, vidas, torpedos y casco del crucero).</li>
+    <li>C: tu posición en formato x, y. Fuera, x va de 0 (izquierda) a 100 (derecha) e y de 0 (abajo) a 40 (arriba). En el laberinto, columna y fila desde 1, abajo a la izquierda, y las salidas.</li>
+    <li>X: dónde está el crucero Vanguardia y cómo está su casco.</li>
+    <li>F: dirección al conducto; en el laberinto, al reactor o a la salida.</li>
+    <li>E: enemigo más cercano. B: bombarderos. D: Acorazado Tirano.</li>
+    <li>A: aliados y cómo va la situación (guardia, entrada del conducto y crucero).</li>
+    <li>O: objetivo actual. H: ayuda de teclas.</li>
+  </ul>
+  <h3>En pausa (Escape o P)</h3>
+  <ul>
+    <li>Escape: continuar. M: menú de sonidos. D: cambiar la dificultad para la próxima partida. Q: salir de la partida.</li>
+  </ul>
+  <h3>En el menú o al terminar una partida</h3>
+  <ul>
+    <li>Enter: empezar una batalla. E: entrenamiento. D: cambiar la dificultad. M: menú de sonidos.</li>
+    <li>Flechas arriba y abajo: recorrer el informe de misión línea a línea. I: escucharlo entero. C: copiarlo para compartirlo.</li>
+  </ul>
+  <h3>En el entrenamiento</h3>
+  <ul>
+    <li>O: repetir las instrucciones del paso. N: saltar el paso.</li>
+  </ul>
+  <h3>Volumen y voces</h3>
+  <ul>
+    <li>Re Pág y Av Pág: volumen general.</li>
+    <li>Inicio y Fin: solo el ruido de fondo de la batalla. Los avisos importantes no cambian. Si hay demasiado jaleo, pulsa Fin varias veces.</li>
+    <li>V: voz del navegador para todos los mensajes (por si no usas lector de pantalla).</li>
+    <li>Mayúsculas más V: activar o desactivar la voz aparte de la radio.</li>
+  </ul>
+
+  <h2 id="celular">Jugar en el celular</h2>
+  <ul>
+    <li>En celulares y tabletas, debajo del juego aparecen los controles táctiles. Puedes activarlos o quitarlos en Opciones, con la casilla Controles táctiles para celular.</li>
+    <li>Los botones cambian según el momento: Menú, Combate, Pausa y Menú de sonidos. Cada botón dice también su tecla, por ejemplo Torpedo, T, para que las instrucciones del entrenamiento te sirvan igual.</li>
+    <li>Arriba, Abajo, Izquierda, Derecha, Disparar y Despacio se quedan pulsados: tócalos una vez para empezar y otra para parar. Al tocar una dirección se suelta la contraria. Parar suelta todos a la vez.</li>
+    <li>En el laberinto, cada toque de una dirección avanza un tramo.</li>
+    <li>Con TalkBack o VoiceOver, toca dos veces para pulsar un botón, como siempre. En el combate, los botones de moverse están colocados como una cruz, con Parar en el centro: puedes encontrarlos tocando la pantalla.</li>
+    <li>Juega con auriculares, igual que en la computadora. También puedes conectar un teclado Bluetooth y usar las teclas de siempre.</li>
+  </ul>
+
+  <h2 id="sonidos">Cómo suena</h2>
+  <ul>
+    <li>Lo que está a tu izquierda o derecha suena en ese oído. Lo que está por encima de ti suena más agudo y lo que está por debajo, más grave. Cuanto más lejos, más bajo y apagado.</li>
+    <li>Cuando suena un aviso importante, el ruido de la batalla baja un instante para que lo oigas bien.</li>
+    <li>Interceptores: zumbido áspero y vibrante. Bombarderos: zumbido muy grave y ondulante. Cazas aliados: motor grave y suave.</li>
+    <li>Fortaleza Lunar: retumbar muy grave. Cuando cae su escudo, el conducto emite un pitido que se acelera cuanto más cerca estás.</li>
+    <li>Radar de mira: pitido continuo y vibrante mientras tienes un enemigo delante y a tu altura. Dispara. Si suena más grave y lento, apuntas al acorazado.</li>
+    <li>Tres pitidos rápidos que suben: un enemigo te apunta. Muévete arriba o abajo.</li>
+    <li>Zumbido eléctrico: estás cerca del perímetro. Suena desde el lado del peligro y sube al acercarte.</li>
+    <li>Carga del rayo: zumbido que sube de tono y vibra cada vez más rápido; más fuerte cuanto más cerca de su línea. Pitidos agudos muy rápidos: estás en la línea. Tono suave: a salvo.</li>
+    <li>Cañones del crucero: doble disparo seco, «pum, pum», desde la izquierda.</li>
+    <li>Conducto: al entrar, una compuerta metálica con eco; dentro, el aire de la ventilación y un zumbido metálico grave.</li>
+    <li>Radio: estática y la voz de la radio.</li>
+  </ul>
+  <p>En el menú de sonidos puedes escuchar cada uno tantas veces como quieras.</p>
+
+  <h2 id="entrenamiento">El entrenamiento</h2>
+  <ol>
+    <li>Moverte: sigue una baliza hasta dos puntos de encuentro.</li>
+    <li>Disparar: derriba dos drones de práctica guiándote por el radar de mira.</li>
+    <li>Esquivar: un interceptor de práctica te dispara; esquiva 3 disparos.</li>
+    <li>El rayo: sal de su línea dos veces, una a cada lado de la fortaleza.</li>
+    <li>Bombarderos: destruye uno con un torpedo antes de que llegue a tu crucero.</li>
+    <li>La guardia: súbela con G y bájala con Mayúsculas más G.</li>
+    <li>El conducto: entra, llega al reactor, lanza el torpedo y sal.</li>
+  </ol>
+  <p>En el entrenamiento no pierdes escudos ni vidas. O repite las instrucciones y N salta un paso.</p>
+
+  <h2 id="puntuacion">Puntuación e informe</h2>
+  <p>Al terminar cada batalla escuchas el informe de misión: resultado, puntuación, tus derribos y los de tus aliados, tus pérdidas y las de tus aliados con lo que las causó (disparos enemigos, cañones del acorazado, el rayo, el perímetro o la explosión de la fortaleza), el estado del crucero y quién dio el golpe de gracia a la fortaleza y al acorazado.</p>
+  <p>La puntuación se calcula así:</p>
+  <ul>
+    <li>Derribos: 100 puntos por interceptor (50 más si es dentro del conducto) y 250 por bombardero.</li>
+    <li>Objetivos: 2.000 por destruir la fortaleza, 3.000 por el acorazado y 500 más si el golpe de gracia al acorazado es tuyo.</li>
+    <li>Victoria: 2.000, más hasta 2.000 según el casco que le quede al crucero, 500 por cada vida que conserves y 3 puntos por cada segundo por debajo de 10 minutos.</li>
+    <li>Se restan 20 puntos por cada aliado caído.</li>
+    <li>Al final se multiplica por la dificultad: por 1 en Fácil, por 1,5 en Normal y por 2 en Difícil.</li>
+  </ul>
+  <p>Tu mejor puntuación de cada dificultad se guarda en este navegador. Pulsa C al terminar para copiar el informe y pegarlo donde quieras.</p>
+
+  <h2 id="opciones">Opciones y dificultad</h2>
+  <table>
+    <caption>Diferencias entre dificultades</caption>
+    <thead><tr><th scope="col">Dificultad</th><th scope="col">Interceptores a la vez</th><th scope="col">Cazas aliados</th><th scope="col">Escudo de la fortaleza</th><th scope="col">Laberinto</th><th scope="col">Intrusos en el conducto</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Fácil</th><td>6</td><td>hasta 10</td><td>60 segundos</td><td>4 por 4</td><td>1</td></tr>
+      <tr><th scope="row">Normal</th><td>9</td><td>hasta 11</td><td>75 segundos</td><td>5 por 5</td><td>2</td></tr>
+      <tr><th scope="row">Difícil</th><td>14</td><td>hasta 13</td><td>90 segundos</td><td>6 por 6</td><td>3</td></tr>
+    </tbody>
+  </table>
+  <p>En Fácil, además, los enemigos hacen menos daño, te dan más tiempo para esquivar y el rayo carga más despacio.</p>
+  <ul>
+    <li><strong>Modo para computadoras lentas</strong>: suenan menos sonidos y motores a la vez. Actívalo si el juego se traba o el sonido se entrecorta.</li>
+    <li><strong>Voz de la radio</strong>: elige una voz del navegador para los mensajes de radio, o ninguna para que los lea tu lector. También su velocidad.</li>
+    <li><strong>Velocidad de tu lector</strong>: el juego espera a que tu lector termine un mensaje antes de mandar el siguiente y descarta los que se quedan viejos. Si los mensajes se te pisan, elige una velocidad más lenta; si notas silencios largos, una más rápida.</li>
+  </ul>
+  <p>El juego recuerda tus opciones para la próxima vez.</p>
+
+  <h2 id="consejos">Consejos</h2>
+  <ul>
+    <li>Mientras el escudo está activo, quédate cerca de tu crucero: es cuando más falta hace contra los bombarderos.</li>
+    <li>Un torpedo destruye un bombardero de un golpe, y el hangar está justo al lado para recargar.</li>
+    <li>Antes de entrar al conducto, pon guardia y escucha la radio: te dirán si hace falta más o si sobran cazas.</li>
+    <li>Entra al conducto con los escudos y los torpedos al máximo.</li>
+    <li>Si vas solo, los interceptores te rodearán: R pide escolta a tus aliados.</li>
+    <li>Si hay demasiado ruido, baja el fondo de la batalla con Fin.</li>
+  </ul>
+
+  <p><a href="index.html">Volver al juego</a></p>
+  <p>Batalla de Orvan es software libre, con licencia GPL-3.0 (Licencia Pública General GNU, versión 3). Puedes jugarlo, copiarlo y mejorarlo; si publicas una versión modificada, compártela con la misma licencia y menciona a su autora o autor original. <a href="https://github.com/lishi-lg/batalla_de_orvan">Código del juego y licencia en GitHub</a>.</p>
+</main>
+</body>
+</html>
